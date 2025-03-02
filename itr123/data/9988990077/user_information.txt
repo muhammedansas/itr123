@@ -1,4 +1,0 @@
-Full Name: ABC
-Phone Number: 9988990077
-Email: a@gmail.com
-Password: a

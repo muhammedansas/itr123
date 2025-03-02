@@ -1,0 +1,6 @@
+accountent1 = 9946969883,1234567890,2345678901
+
+
+# pannumber = 12345rtyul
+# year
+# itr1,itr2,itr3

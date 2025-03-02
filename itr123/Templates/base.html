@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        /* Previous styles remain the same */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .slide-in {
+            animation: slideInRight 0.5s ease-in;
+        }
+        .notification {
+            animation: slideInDown 0.5s ease-in;
+            transition: all 0.3s ease;
+        }
+        .notification:hover {
+            transform: translateY(-2px);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .notification.hide {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-white text-3xl font-bold tracking-tight hover:text-blue-200 transition duration-300">
+                Tax<span class="text-blue-200">Manager</span>
+            </a>
+            <div class="flex items-center space-x-6">
+                {% if request.session.user_phone %}
+                    <span class="text-white">Welcome, {{ request.session.user_name }}!</span>
+                    <a href="{% url 'logout' %}" class="bg-white text-blue-600 px-6 py-2 rounded-full hover:bg-blue-100 transition duration-300 shadow-md hover:shadow-lg">Logout</a>
+                {% else %}
+                    <a href="{% url 'signin' %}" class="nav-link text-white hover:text-blue-200 transition duration-300">Sign In</a>
+                    <a href="{% url 'signup' %}" class="bg-white text-blue-600 px-6 py-2 rounded-full hover:bg-blue-100 transition duration-300 shadow-md hover:shadow-lg">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="fixed top-4 right-4 z-50 space-y-2" id="message-container">
+            {% for message in messages %}
+                <div class="notification bg-gradient-to-r {% if message.tags == 'success' %}from-green-500 to-green-600{% else %}from-red-500 to-red-600{% endif %} text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        {% if message.tags == 'success' %}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        {% else %}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                    <button onclick="closeMessage(this)" class="ml-4 hover:text-gray-200 focus:outline-none transition duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+
+    <footer class="bg-gradient-to-r from-blue-800 to-blue-900 text-white py-8 mt-8">
+        <div class="container mx-auto text-center">
+            <p class="text-blue-200">&copy; 2025 Tax Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function closeMessage(button) {
+            const notification = button.closest('.notification');
+            notification.classList.add('hide');
+            setTimeout(() => {
+                notification.remove();
+                const container = document.getElementById('message-container');
+                if (container && container.children.length === 0) {
+                    container.remove();
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>

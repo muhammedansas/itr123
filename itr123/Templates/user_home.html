@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-12 fade-in">
+            <h1 class="text-4xl font-bold text-gray-800">Tax Dashboard</h1>
+            <p class="text-gray-600 mt-2">Manage your tax filings and view your tax history</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Tax Filing Card -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden tax-card fade-in">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+                    <h2 class="text-2xl font-bold text-white">File New Tax Return</h2>
+                    <p class="text-blue-100 mt-1">Start or continue your tax filing process</p>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Guided, step-by-step filing process</span>
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Secure document upload</span>
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Real-time tax calculation</span>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <a href="{% url 'tax_questions' %}" class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center font-semibold py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            Start Filing
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax Status Card -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden tax-card fade-in">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+                    <h2 class="text-2xl font-bold text-white">Tax Filing Status</h2>
+                    <p class="text-blue-100 mt-1">Overview of your tax filing activity</p>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between mb-6">
+                        <div class="text-center px-4 py-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-600 font-medium">Completed</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ completed_filings|default:"0" }}</p>
+                        </div>
+                        <div class="text-center px-4 py-3 bg-yellow-50 rounded-lg">
+                            <p class="text-sm text-yellow-600 font-medium">In Progress</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ in_progress_filings|default:"0" }}</p>
+                        </div>
+                        <div class="text-center px-4 py-3 bg-green-50 rounded-lg">
+                            <p class="text-sm text-green-600 font-medium">Refund Due</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ refund_filings|default:"0" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600" style="width: {{ completion_percentage|default:'0' }}%;"></div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">{{ completion_percentage|default:'0' }}% completion rate for current tax year</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filed Taxes Section -->
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden fade-in mb-8">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+        <h2 class="text-2xl font-bold text-white">Filed Tax Returns</h2>
+        <p class="text-blue-100 mt-1">History of your previously filed tax returns</p>
+    </div>
+    
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="relative w-64">
+                <input type="text" id="search-tax" placeholder="Search by year or status..." 
+                    class="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition">
+                <div class="absolute left-3 top-2.5 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <div>
+                <select id="filter-year" class="border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition mr-2">
+                    <option value="all">All Years</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                </select>
+                <select id="filter-status" class="border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition">
+                    <option value="all">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="refund-due">Refund Due</option>
+                </select>
+            </div>
+        </div>
+        
+        {% if tax_filings %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Year</th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filing Status</th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filed Date</th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for filing in tax_filings %}
+                    <tr class="table-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ filing.tax_year }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ filing.filing_status }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ filing.filed_date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if filing.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif filing.status == 'in-progress' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ filing.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ filing.amount }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'view_tax_filing' filing.id %}" class="text-blue-600 hover:text-blue-900 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </a>
+                                <a href="{% url 'delete_tax_filing' filing.id %}" class="text-red-600 hover:text-red-900 transition" onclick="return confirm('Are you sure you want to delete this tax filing?');">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-700 mb-1">No Tax Filings Found</h3>
+            <p class="text-gray-500">You haven't filed any tax returns yet.</p>
+            <a href="{% url 'tax_questions' %}" class="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Start Filing Now</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+        
+        <!-- Tax Tips Section -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden fade-in">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+                <h2 class="text-2xl font-bold text-white">Tax Tips & Updates</h2>
+                <p class="text-blue-100 mt-1">Latest information to help you save on taxes</p>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 p-5 rounded-xl card-hover">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">New Tax Deductions</h3>
+                    <p class="text-sm text-gray-600 mb-4">Learn about the latest deductions for the current tax year that can help you save money.</p>
+                    <a href="#" class="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center">
+                        Learn more
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="bg-blue-50 p-5 rounded-xl card-hover">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Tax Filing Deadline</h3>
+                    <p class="text-sm text-gray-600 mb-4">The deadline for filing your tax returns is July 31, 2025. Don't miss out!</p>
+                    <a href="#" class="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center">
+                        Set reminder
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="bg-blue-50 p-5 rounded-xl card-hover">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Tax Saving Investments</h3>
+                    <p class="text-sm text-gray-600 mb-4">Discover the best investment options to maximize your tax savings under Section 80C.</p>
+                    <a href="#" class="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center">
+                        View options
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Search functionality
+    document.getElementById('search-tax').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        tableRows.forEach(row => {
+            const rowText = row.textContent.toLowerCase();
+            if (rowText.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Filter functionality
+    function applyFilters() {
+        const yearFilter = document.getElementById('filter-year').value;
+        const statusFilter = document.getElementById('filter-status').value;
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        tableRows.forEach(row => {
+            const year = row.cells[0].textContent;
+            const status = row.cells[3].textContent.trim().toLowerCase();
+            
+            const yearMatch = yearFilter === 'all' || year === yearFilter;
+            const statusMatch = statusFilter === 'all' || status === statusFilter;
+            
+            if (yearMatch && statusMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    document.getElementById('filter-year').addEventListener('change', applyFilters);
+    document.getElementById('filter-status').addEventListener('change', applyFilters);
+</script>
+{% endblock %}

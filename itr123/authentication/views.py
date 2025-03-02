@@ -83,7 +83,7 @@ def signin(request):
                 request.session['user_phone'] = phone
                 request.session['user_name'] = full_name
                 messages.success(request, 'Successfully logged in!')
-                return redirect('tax_questions')
+                return redirect('user_home')
             else:
                 messages.error(request, 'Invalid password!')
         else:

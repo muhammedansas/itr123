@@ -9,6 +9,7 @@ urlpatterns = [
     path('user_home/', views.user_home, name='user_home'),
     path('tax/view/<str:filing_id>/', views.view_tax_filing, name='view_tax_filing'),
     path('tax/delete/<str:filing_id>/', views.delete_tax_filing, name='delete_tax_filing'),
+    path('ca/home/', views.ca_home, name='ca_home'),
     path('tax/download/<str:user_phone>/<str:name>/<str:tax_year>/<str:filename>/',
          views.download_document, name='download_document'),
     path('tax/download-all/<str:filing_id>/',

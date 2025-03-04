@@ -1,203 +1,146 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-12">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header Section -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Tax Filing Information</h1>
-            <p class="text-gray-600 mt-2">Please complete all required information to proceed with your tax filing</p>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Tax Filing Information</h1>
+            <p class="text-gray-600 mt-1">Complete all required information to proceed with your tax filing.</p>
         </div>
 
-        <!-- Main Form Card -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden fade-in">
-            <!-- Progress Bar -->
-            <div class="w-full bg-gray-100 h-2">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden fade-in">
+            <div class="w-full bg-gray-100 h-1.5">
                 <div class="w-1/4 h-full bg-gradient-to-r from-blue-500 to-blue-600"></div>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" class="p-8">
+            <form method="POST" enctype="multipart/form-data" class="p-6">
                 {% csrf_token %}
 
-                <!-- Section 1: Basic Information -->
-                <div class="space-y-8">
-                    <!-- Name Field (New) -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-lg font-semibold text-gray-700">Name for Filing</label>
-                            <span class="text-sm text-gray-500">Required</span>
-                        </div>
-                        <input type="text" name="user_entered_name" placeholder="Enter name for this filing" required
-                               class="w-full text-gray-700 bg-white border-2 border-gray-200 rounded-xl px-4 py-3
-                                      focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50
-                                      transition duration-200">
+                <div class="space-y-6">
+                    <!-- PAN Number -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">PAN Number <span class="text-red-500">*</span></label>
+                        <input type="text" name="pan_number" placeholder="Enter PAN Number" required
+                               class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                      focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
                     </div>
 
-                    <!-- Tax Year Selection -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-lg font-semibold text-gray-700">Select Tax Year</label>
-                            <span class="text-sm text-gray-500">Required</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4">
+                    <!-- Name -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" placeholder="Enter your name" required
+                               class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                      focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                    </div>
+
+                    <!-- Tax Year Dropdown -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Tax Year <span class="text-red-500">*</span></label>
+                        <select name="tax_year" required
+                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <option value="" disabled selected>Select Tax Year</option>
                             {% for year in years %}
-                            <div class="relative">
-                                <input type="radio" id="year_{{ year }}" name="tax_year" value="{{ year }}" 
-                                       class="peer absolute h-full w-full opacity-0 z-10 cursor-pointer" required>
-                                <label for="year_{{ year }}" 
-                                       class="block text-center p-4 bg-white border-2 border-gray-200 rounded-xl 
-                                              peer-checked:border-blue-500 peer-checked:bg-blue-50 
-                                              hover:border-blue-200 transition-all duration-200 cursor-pointer">
-                                    <span class="text-xl font-medium text-gray-700 peer-checked:text-blue-600">{{ year }}</span>
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Income Type Selection -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-lg font-semibold text-gray-700">Income Type</label>
-                            <span class="text-sm text-gray-500">Required</span>
-                        </div>
-                        <select name="income_type" 
-                                class="w-full text-gray-700 bg-white border-2 border-gray-200 rounded-xl px-4 py-3
-                                       focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50
-                                       transition duration-200" required>
-                            <option value="">Choose your income type</option>
-                            {% for type in income_types %}
-                            <option value="{{ type }}">{{ type }}</option>
+                            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Filing Status -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-lg font-semibold text-gray-700">Filing Status</label>
-                            <span class="text-sm text-gray-500">Required</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            {% for status in filing_statuses %}
-                            <div class="relative">
-                                <input type="radio" id="status_{{ forloop.counter }}" name="filing_status" 
-                                       value="{{ status }}" class="peer absolute h-full w-full opacity-0 z-10 cursor-pointer" required>
-                                <label for="status_{{ forloop.counter }}" 
-                                       class="block text-center p-4 bg-white border-2 border-gray-200 rounded-xl
-                                              peer-checked:border-blue-500 peer-checked:bg-blue-50
-                                              hover:border-blue-200 transition-all duration-200 cursor-pointer">
-                                    <span class="font-medium text-gray-700 peer-checked:text-blue-600">{{ status }}</span>
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
+                    <!-- Income Type Dropdown -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Income Type <span class="text-red-500">*</span></label>
+                        <select name="income_type" required
+                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <option value="" disabled selected>Select Income Type</option>
+                            <option value="Salary">Salary</option>
+                            <option value="House Property">House Property</option>
+                            <option value="Capital Gains">Capital Gains</option>
+                            <option value="Business/Profession">Business/Profession</option>
+                            <option value="Other Sources">Other Sources</option>
+                        </select>
                     </div>
 
-                    <!-- Previous Filing Experience -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-lg font-semibold text-gray-700">Have you filed taxes before?</label>
-                            <span class="text-sm text-gray-500">Required</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="relative">
-                                <input type="radio" id="prev_yes" name="previous_filing" value="Yes" 
-                                       class="peer absolute h-full w-full opacity-0 z-10 cursor-pointer" required>
-                                <label for="prev_yes" 
-                                       class="block text-center p-4 bg-white border-2 border-gray-200 rounded-xl
-                                              peer-checked:border-blue-500 peer-checked:bg-blue-50
-                                              hover:border-blue-200 transition-all duration-200 cursor-pointer">
-                                    <span class="font-medium text-gray-700 peer-checked:text-blue-600">Yes</span>
-                                </label>
-                            </div>
-                            <div class="relative">
-                                <input type="radio" id="prev_no" name="previous_filing" value="No" 
-                                       class="peer absolute h-full w-full opacity-0 z-10 cursor-pointer" required>
-                                <label for="prev_no" 
-                                       class="block text-center p-4 bg-white border-2 border-gray-200 rounded-xl
-                                              peer-checked:border-blue-500 peer-checked:bg-blue-50
-                                              hover:border-blue-200 transition-all duration-200 cursor-pointer">
-                                    <span class="font-medium text-gray-700 peer-checked:text-blue-600">No</span>
-                                </label>
-                            </div>
-                        </div>
+                    <!-- Filing Status Dropdown -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Filing Status <span class="text-red-500">*</span></label>
+                        <select name="filing_status" required
+                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <option value="" disabled selected>Select Filing Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married Filing Jointly">Married Filing Jointly</option>
+                            <option value="Married Filing Separately">Married Filing Separately</option>
+                            <option value="Head of Household">Head of Household</option>
+                        </select>
+                    </div>
+
+                    <!-- Previous Tax Filing Dropdown -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Have you filed taxes before? <span class="text-red-500">*</span></label>
+                        <select name="previous_filing" required
+                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <option value="" disabled selected>Select an option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- Section 2: Document Upload -->
-                <div class="mt-12 space-y-8">
-                    <h2 class="text-xl font-bold text-gray-800 pb-4 border-b">Required Documents</h2>
+                <!-- Required Documents Section -->
+                <div class="mt-8 space-y-6">
+                    <h2 class="text-lg font-semibold text-gray-800 pb-2 border-b">Required Documents</h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- PAN Card Upload -->
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <label class="font-medium text-gray-700">PAN Card</label>
-                                <span class="text-sm text-gray-500">Required</span>
-                            </div>
-                            <div class="relative">
-                                <input type="file" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required
-                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                                              file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                              file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                              cursor-pointer border-2 border-gray-200 rounded-xl p-2">
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- PAN Card -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">PAN Card <span class="text-red-500">*</span></label>
+                            <input type="file" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
 
-                        <!-- Aadhar Card Upload -->
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <label class="font-medium text-gray-700">Aadhar Card</label>
-                                <span class="text-sm text-gray-500">Required</span>
-                            </div>
-                            <div class="relative">
-                                <input type="file" name="aadhar_card" accept=".pdf,.jpg,.jpeg,.png" required
-                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                                              file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                              file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                              cursor-pointer border-2 border-gray-200 rounded-xl p-2">
-                            </div>
+                        <!-- Aadhar Card -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">Aadhar Card <span class="text-red-500">*</span></label>
+                            <input type="file" name="aadhar_card" accept=".pdf,.jpg,.jpeg,.png" required
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
 
-                        <!-- Form 16 Upload -->
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <label class="font-medium text-gray-700">Form 16</label>
-                                <span class="text-sm text-gray-500">Required</span>
-                            </div>
-                            <div class="relative">
-                                <input type="file" name="form16" accept=".pdf" required
-                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                                              file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                              file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                              cursor-pointer border-2 border-gray-200 rounded-xl p-2">
-                            </div>
+                        <!-- Form 16 -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">Form 16 <span class="text-red-500">*</span></label>
+                            <input type="file" name="form16" accept=".pdf" required
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
 
-                        <!-- Bank Statement Upload -->
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <label class="font-medium text-gray-700">Bank Statement</label>
-                                <span class="text-sm text-gray-500">Required</span>
-                            </div>
-                            <div class="relative">
-                                <input type="file" name="bank_statement" accept=".pdf,.xlsx" required
-                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                                              file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                              file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                              cursor-pointer border-2 border-gray-200 rounded-xl p-2">
-                            </div>
+                        <!-- Bank Statement -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">Bank Statement <span class="text-red-500">*</span></label>
+                            <input type="file" name="bank_statement" accept=".pdf,.xlsx" required
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
-                <div class="mt-12">
+                <div class="mt-8">
                     <button type="submit" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold
-                                   py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 
-                                   transition duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold
+                                   py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 
+                                   transition duration-300 transform hover:-translate-y-0.5 hover:shadow-md">
                         Continue to Next Step
                     </button>
                 </div>

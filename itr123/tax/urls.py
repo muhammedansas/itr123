@@ -8,10 +8,9 @@ urlpatterns = [
     path('tax_questions/', views.tax_questions, name='tax_questions'),
     path('user_home/', views.user_home, name='user_home'),
     path('tax/view/<str:filing_id>/', views.view_tax_filing, name='view_tax_filing'),
-    path('tax/delete/<str:filing_id>/', views.delete_tax_filing, name='delete_tax_filing'),
-    path('ca/home/', views.ca_home, name='ca_home'),
-    path('tax/download/<str:user_phone>/<str:name>/<str:tax_year>/<str:filename>/',
-         views.download_document, name='download_document'),
-    path('tax/download-all/<str:filing_id>/',
-         views.download_all_documents, name='download_all_documents'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('myfilings/', views.my_filings, name='myfilings'),
+    path("save-message/", views.save_message, name="save_message"),
+    path('get_audit_trail/', views.get_audit_trail, name='get_audit_trail'),
+    path("download-all-docs/<str:filing_id>/", views.download_all_documents, name="download_all_docs"),
+    path('upload-document/', views.upload_document, name='upload_document'),
+]

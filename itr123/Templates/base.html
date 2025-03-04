@@ -53,7 +53,7 @@
 <body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
     <nav class="bg-gradient-to-r from-blue-600 to-blue-800 p-4 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="{% url 'home' %}" class="text-white text-3xl font-bold tracking-tight hover:text-blue-200 transition duration-300">
+            <a href="{% url 'user_home' %}" class="text-white text-3xl font-bold tracking-tight hover:text-blue-200 transition duration-300">
                 Tax<span class="text-blue-200">Manager</span>
             </a>
             <div class="flex items-center space-x-6">
@@ -97,12 +97,14 @@
     {% block content %}
     {% endblock %}
 
+
     <footer class="bg-gradient-to-r from-blue-800 to-blue-900 text-white py-8 mt-8">
         <div class="container mx-auto text-center">
             <p class="text-blue-200">&copy; 2025 Tax Management System. All rights reserved.</p>
         </div>
     </footer>
 
+    {% block script %}
     <script>
         function closeMessage(button) {
             const notification = button.closest('.notification');
@@ -116,5 +118,6 @@
             }, 300);
         }
     </script>
+    {% endblock %}
 </body>
 </html>

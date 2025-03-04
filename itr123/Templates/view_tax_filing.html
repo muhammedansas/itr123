@@ -1,336 +1,516 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="flex h-screen bg-gray-50">
-    <!-- Sidebar with animation -->
-    <aside class="w-64 bg-white border-r border-gray-200 shadow-sm transform transition-all duration-300 ease-in-out">
-        <div class="p-4 border-b border-gray-200">
-            <h1 class="text-xl font-bold text-blue-500 transition-colors duration-200 hover:text-blue-600">TaxDocuVerse</h1>
-            {% if request.session.user_type == 'ca' %}
-            <p class="text-sm text-gray-600">CA Portal</p>
-            {% else %}
-            <p class="text-sm text-gray-600">User Portal</p>
-            {% endif %}
+  <!-- Sidebar with animation -->
+  <aside
+    class="w-64 bg-white border-r border-gray-200 shadow-sm transform transition-all duration-300 ease-in-out"
+  >
+    <div class="p-4 border-b border-gray-200">
+      <h1
+        class="text-xl font-bold text-blue-500 transition-colors duration-200 hover:text-blue-600"
+      >
+        TaxDocuVerse
+      </h1>
+      {% if request.session.user_type == 'ca' %}
+      <p class="text-sm text-gray-600">CA Portal</p>
+      {% else %}
+      <p class="text-sm text-gray-600">User Portal</p>
+      {% endif %}
+    </div>
+
+    <div class="p-4">
+      <p class="text-sm font-medium text-gray-500 mb-4">Main Menu</p>
+      <nav class="space-y-2">
+        <a
+          href="{% url 'user_home' %}"
+          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        {% if request.session.user_type == 'ca' %}
+        <a
+          href="{% url 'myfilings' %}"
+          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Client Filings
+        </a>
+        {% else %}
+        <a
+          href="{% url 'myfilings' %}"
+          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          My Filings
+        </a>
+        {% endif %}
+        <a
+          href=""
+          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Profile
+        </a>
+      </nav>
+    </div>
+
+    <div
+      class="absolute bottom-0 w-64 p-4 text-xs text-gray-500 border-t border-gray-200"
+    >
+      <p>© 2023 TaxDocuVerse</p>
+      <p>Professional tax services</p>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Content area -->
+    <main class="flex-1 overflow-auto p-6">
+      <div class="max-w-7xl mx-auto">
+        <!-- Back button and header with animation -->
+        <div class="flex items-center mb-4">
+          <a
+            href="{% url 'user_home' %}"
+            class="mr-3 text-gray-500 hover:text-blue-500 transition-all duration-200 transform hover:scale-110 hover:-translate-x-1"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </a>
+          <div
+            class="transition-all duration-300 transform hover:translate-x-1"
+          >
+            <h1 class="text-xl font-bold text-gray-900">Filing Details</h1>
+            <p class="text-sm text-gray-600">
+              Income Tax Return · {{ tax_year }}
+            </p>
+          </div>
         </div>
-        
-        <div class="p-4">
-            <p class="text-sm font-medium text-gray-500 mb-4">Main Menu</p>
-            <nav class="space-y-2">
-                <a href="{% url 'user_home' %}" class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                    </svg>
-                    Dashboard
-                </a>
-                {% if request.session.user_type == 'ca' %}
-                <a href="{% url 'myfilings' %}" class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-                    </svg>
-                    Client Filings
-                </a>
-                {% else %}
-                <a href="{% url 'myfilings' %}" class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-                    </svg>
-                    My Filings
-                </a>
-                {% endif %}
-                <a href="" class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                    </svg>
-                    Profile
-                </a>
-            </nav>
-        </div>
-        
-        <div class="absolute bottom-0 w-64 p-4 text-xs text-gray-500 border-t border-gray-200">
-            <p>© 2023 TaxDocuVerse</p>
-            <p>Professional tax services</p>
-        </div>
-    </aside>
-    
-    <!-- Main content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        
-        <!-- Content area -->
-        <main class="flex-1 overflow-auto p-6">
-            <div class="max-w-7xl mx-auto">
-                <!-- Back button and header with animation -->
-                <div class="flex items-center mb-4">
-                    <a href="{% url 'user_home' %}" class="mr-3 text-gray-500 hover:text-blue-500 transition-all duration-200 transform hover:scale-110 hover:-translate-x-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Filing Information with animations -->
+          <div
+            class="lg:col-span-1 transition-all duration-300 transform hover:scale-102 hover:shadow-md"
+          >
+            <div
+              class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+            >
+              <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">
+                  Filing Information
+                </h2>
+
+                <div class="space-y-4">
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                  >
+                    <span class="text-sm text-gray-600">Status</span>
+                    <span
+                      class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 transition-all duration-300 hover:bg-yellow-200"
+                      >{{status}}</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                  >
+                    <span class="text-sm text-gray-600">Name</span>
+                    <span class="text-sm text-gray-900">{{user_name}}</span>
+                  </div>
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                  >
+                    <span class="text-sm text-gray-600">Pan Number</span>
+                    <span class="text-sm text-gray-900">{{pan_number}}</span>
+                  </div>
+
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                  >
+                    <span class="text-sm text-gray-600">Tax Year</span>
+                    <span class="text-sm text-gray-900">{{ tax_year }}</span>
+                  </div>
+
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                  >
+                    <span class="text-sm text-gray-600">Last Updated</span>
+                    <span class="text-sm text-gray-900"
+                      >{{ submission_date }}</span
+                    >
+                  </div>
+                </div>
+
+                <div class="mt-6">
+                  <h3 class="text-sm font-medium text-gray-600 mb-3">
+                    Update Status
+                  </h3>
+                  <div class="flex space-x-2">
+                    <button
+                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Pending' %}bg-blue-100 text-blue-700 border border-blue-300{% else %}bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600{% endif %}"
+                    >
+                      Pending
+                    </button>
+                    <button
+                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'In Review' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-gray-100 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600{% endif %}"
+                    >
+                      In Review
+                    </button>
+                    <button
+                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Completed' %}bg-green-100 text-green-700 border border-green-300{% else %}bg-gray-100 text-gray-700 hover:bg-green-50 hover:text-green-600{% endif %}"
+                    >
+                      Completed
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Uploaded Documents with animations -->
+          <div
+            class="lg:col-span-2 transition-all duration-300 transform hover:scale-102 hover:shadow-md"
+          >
+            <div
+              class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+            >
+              <div class="border-b border-gray-200">
+                <div class="flex">
+                  <button
+                    id="documents-tab"
+                    class="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-300 hover:bg-gray-50"
+                  >
+                    Documents
+                  </button>
+                  <button
+                    id="audit-tab"
+                    class="px-6 py-3 text-sm font-medium text-gray-900 border-b-2 border-blue-500 transition-all duration-300 hover:bg-blue-50"
+                  >
+                    Audit Trail
+                  </button>
+                </div>
+              </div>
+
+              <!-- Documents content section -->
+              <div id="documents-content" class="p-6 hidden">
+                <h2 class="text-lg font-medium text-gray-900 mb-6">
+                  Uploaded Documents
+                </h2>
+
+                <div class="space-y-4">
+                  {% for document in documents %}
+                  <div
+                    class="flex items-center justify-between p-4 bg-gray-50 rounded-lg transition-all duration-300 transform hover:translate-x-1 hover:bg-blue-50 hover:shadow-md"
+                  >
+                    <div class="flex items-center">
+                      <div
+                        class="flex-shrink-0 text-blue-500 transition-transform duration-300 hover:scale-110 transform"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
-                    </a>
-                    <div class="transition-all duration-300 transform hover:translate-x-1">
-                        <h1 class="text-xl font-bold text-gray-900">Filing Details</h1>
-                        <p class="text-sm text-gray-600">Income Tax Return · {{ tax_year }}</p>
+                      </div>
+                      <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-900">
+                          {{ document.name }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {{ document.upload_date }} · {{ document.size }}
+                        </p>
+                      </div>
                     </div>
+                    <button
+                      class="text-blue-500 hover:text-blue-700 transition-all duration-300 transform hover:scale-125 hover:rotate-12"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  {% endfor %}
                 </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Filing Information with animations --> 
-                    <div class="lg:col-span-1 transition-all duration-300 transform hover:scale-102 hover:shadow-md">
-                        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-                            <div class="p-6">
-                                <h2 class="text-lg font-medium text-gray-900 mb-6">Filing Information</h2>
-                                
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2">
-                                        <span class="text-sm text-gray-600">Status</span>
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 transition-all duration-300 hover:bg-yellow-200">{{status}}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2">
-                                        <span class="text-sm text-gray-600">Name</span>
-                                        <span class="text-sm text-gray-900">{{user_name}}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2">
-                                        <span class="text-sm text-gray-600">Pan Number</span>
-                                        <span class="text-sm text-gray-900">{{pan_number}}</span>
-                                    </div>
-                                
-                                    <div class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2">
-                                        <span class="text-sm text-gray-600">Tax Year</span>
-                                        <span class="text-sm text-gray-900">{{ tax_year }}</span>
-                                    </div>
-                                    
-                                    <div class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2">
-                                        <span class="text-sm text-gray-600">Last Updated</span>
-                                        <span class="text-sm text-gray-900">{{ submission_date }}</span>
-                                    </div>
-                                    
-                                    
-                                </div>
-                                
-                                <div class="mt-6">
-                                    <h3 class="text-sm font-medium text-gray-600 mb-3">Update Status</h3>
-                                    <div class="flex space-x-2">
-                                        <button class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Pending' %}bg-blue-100 text-blue-700 border border-blue-300{% else %}bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600{% endif %}">
-                                            Pending
-                                        </button>
-                                        <button class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'In Review' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-gray-100 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600{% endif %}">
-                                            In Review
-                                        </button>
-                                        <button class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Completed' %}bg-green-100 text-green-700 border border-green-300{% else %}bg-gray-100 text-gray-700 hover:bg-green-50 hover:text-green-600{% endif %}">
-                                            Completed
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Uploaded Documents with animations -->
-                    <div class="lg:col-span-2 transition-all duration-300 transform hover:scale-102 hover:shadow-md">
-                        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-                            <div class="border-b border-gray-200">
-                                <div class="flex">
-                                    <button id="documents-tab" class="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-300 hover:bg-gray-50">
-                                        Documents
-                                    </button>
-                                    <button id="audit-tab" class="px-6 py-3 text-sm font-medium text-gray-900 border-b-2 border-blue-500 transition-all duration-300 hover:bg-blue-50">
-                                        Audit Trail
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Documents content section -->
-                            <div id="documents-content" class="p-6 hidden">
-                                <h2 class="text-lg font-medium text-gray-900 mb-6">Uploaded Documents</h2>
-                                
-                                <div class="space-y-4">
-                                    {% for document in documents %}
-                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg transition-all duration-300 transform hover:translate-x-1 hover:bg-blue-50 hover:shadow-md">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 text-blue-500 transition-transform duration-300 hover:scale-110 transform">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <p class="text-sm font-medium text-gray-900">{{ document.name }}</p>
-                                                <p class="text-xs text-gray-500">{{ document.upload_date }} · {{ document.size }}</p>
-                                            </div>
-                                        </div>
-                                        <button class="text-blue-500 hover:text-blue-700 transition-all duration-300 transform hover:scale-125 hover:rotate-12">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                
-                                <!-- Button Container with Flex -->
-                                <div class="mt-4 flex justify-between items-center">
-                                    <!-- Download All Documents Button -->
-                                    <a href="{% url 'download_all_docs' filing_id=filing_id %}" 
-                                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300">
-                                        Download All Documents
-                                    </a>
-                                    <input type="file" id="fileInput" class="hidden" onchange="uploadFile()">
-                                
-                                    <!-- Upload New Document Button -->
-                                    <button onclick="document.getElementById('fileInput').click();" 
-            class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95">
-        Upload New Document
-    </button>
-                                </div> 
-                                <div id="uploadStatus" class="mt-2 text-sm text-gray-600"></div>
-                                
-                            </div>
-                            
-                        </div>
-<!-- Audit Trail content section -->
-<div id="audit-content" class="p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-6">Communication Audit Trail</h2>
 
-    <div id="audit-messages" class="space-y-2 bg-gray-100 p-4 rounded-lg">
-        {% for msg in audit_messages %}
-            <div class="p-2 bg-white shadow rounded-md">
-                <strong class="text-gray-800">{{ msg.name }}</strong>: 
-                <p class="text-gray-600">{{ msg.message }}</p>
+                <!-- Button Container with Flex -->
+                <div class="mt-4 flex justify-between items-center">
+                  <!-- Download All Documents Button -->
+                  <a
+                    href="{% url 'download_all_docs' filing_id=filing_id %}"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
+                  >
+                    Download All Documents
+                  </a>
+                  <input
+                    type="file"
+                    id="fileInput"
+                    class="hidden"
+                    onchange="uploadFile()"
+                  />
+
+                  <!-- Upload New Document Button -->
+                  {% if request.session.user_type == 'user' %}
+                  <button
+                    onclick="document.getElementById('fileInput').click();"
+                    class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  >
+                    Upload New Document
+                  </button>
+                  {% endif %}
+                </div>
+                <div id="uploadStatus" class="mt-2 text-sm text-gray-600"></div>
+              </div>
             </div>
-        {% empty %}
-            <p class="text-gray-500">No messages found.</p>
-        {% endfor %}
-    </div>
+            <!-- Audit Trail content section -->
+            <div id="audit-content" class="p-6">
+              <h2 class="text-lg font-medium text-gray-900 mb-6">
+                Communication Audit Trail
+              </h2>
 
-    <!-- Message input area -->
-    <div class="mt-6">
-        <div class="relative">
-            <textarea id="message-input" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Type your message..."></textarea>
-            <button id="send-message" class="absolute bottom-2 right-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Send
-            </button>
+              <div
+                id="audit-messages"
+                class="space-y-2 bg-gray-100 p-4 rounded-lg"
+              >
+                {% for msg in audit_messages %}
+                <div class="p-2 bg-white shadow rounded-md">
+                  <strong class="text-gray-800">{{ msg.name }}</strong>:
+                  <p class="text-gray-600">{{ msg.message }}</p>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No messages found.</p>
+                {% endfor %}
+              </div>
+
+              <!-- Message input area -->
+              <div class="mt-6">
+                <div class="relative">
+                  <textarea
+                    id="message-input"
+                    class="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="Type your message..."
+                  ></textarea>
+                  <button
+                    id="send-message"
+                    class="absolute bottom-2 right-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-</div>                  
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+      </div>
+    </main>
+  </div>
 </div>
 
 <!-- Include inline script for immediate execution -->
 <script>
-    function uploadFile() {
-        let fileInput = document.getElementById('fileInput');
-        let file = fileInput.files[0];
+  function uploadFile() {
+    let fileInput = document.getElementById("fileInput");
+    let file = fileInput.files[0];
 
-        if (!file) return;
+    if (!file) return;
 
-        let formData = new FormData();
-        formData.append('file', file);
-        formData.append('filing_id', '{{ filing_id }}'); // Send filing_id to backend
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append("filing_id", "{{ filing_id }}"); // Send filing_id to backend
 
-        fetch("{% url 'upload_document' %}", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}"
-            }
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  document.getElementById('uploadStatus').innerHTML = 
-                      '<span class="text-green-600">Upload successful!</span>';
-                  location.reload(); // Refresh page to show new document
-              } else {
-                  document.getElementById('uploadStatus').innerHTML = 
-                      '<span class="text-red-600">Upload failed: ' + data.error + '</span>';
-              }
-          })
-          .catch(error => {
-              document.getElementById('uploadStatus').innerHTML = 
-                  '<span class="text-red-600">Error uploading file.</span>';
-          });
-    }
-    document.addEventListener("DOMContentLoaded", function () {
-        // Message sending functionality
-        const sendMessageButton = document.getElementById("send-message");
-        const messageInput = document.getElementById("message-input");
-
-        if (sendMessageButton && messageInput) {
-            sendMessageButton.addEventListener("click", function () {
-                const message = messageInput.value.trim();
-                const taxYear = "{{ tax_year }}";
-                const name = "{{ name }}";
-                const phone = "{{ user_phone }}"
-                if (message === "") return;
-
-                fetch("{% url 'save_message' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}",
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        user_phone: "{{ request.session.user_phone }}",
-                        tax_file_name: name,  // Replace dynamically
-                        tax_year: taxYear,  // Replace dynamically
-                        phone:phone
-                    }),
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "success") {
-                            console.log("Message saved successfully!");
-                            messageInput.value = "";
-                        } else {
-                            console.error("Error saving message");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-            });
+    fetch("{% url 'upload_document' %}", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          document.getElementById("uploadStatus").innerHTML =
+            '<span class="text-green-600">Upload successful!</span>';
+          location.reload(); // Refresh page to show new document
+        } else {
+          document.getElementById("uploadStatus").innerHTML =
+            '<span class="text-red-600">Upload failed: ' +
+            data.error +
+            "</span>";
         }
+      })
+      .catch((error) => {
+        document.getElementById("uploadStatus").innerHTML =
+          '<span class="text-red-600">Error uploading file.</span>';
+      });
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    // Message sending functionality
+    const sendMessageButton = document.getElementById("send-message");
+    const messageInput = document.getElementById("message-input");
 
-        // Tab switching functionality
-        setTimeout(function () {
-            const documentsTab = document.getElementById('documents-tab');
-            const auditTab = document.getElementById('audit-tab');
-            const documentsContent = document.getElementById('documents-content');
-            const auditContent = document.getElementById('audit-content');
+    if (sendMessageButton && messageInput) {
+      sendMessageButton.addEventListener("click", function () {
+        const message = messageInput.value.trim();
+        const taxYear = "{{ tax_year }}";
+        const name = "{{ name }}";
+        const phone = "{{ user_phone }}";
+        if (message === "") return;
 
-            if (!documentsTab || !auditTab || !documentsContent || !auditContent) {
-                console.error('One or more elements not found');
-                return;
+        fetch("{% url 'save_message' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify({
+            message: message,
+            user_phone: "{{ request.session.user_phone }}",
+            tax_file_name: name, // Replace dynamically
+            tax_year: taxYear, // Replace dynamically
+            phone: phone,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              console.log("Message saved successfully!");
+              messageInput.value = "";
+            } else {
+              console.error("Error saving message");
             }
+          })
+          .catch((error) => console.error("Error:", error));
+      });
+    }
 
-            // Initial state - show Audit Trail
-            documentsContent.classList.add('hidden');
-            auditContent.classList.remove('hidden');
-            documentsTab.classList.remove('text-gray-900', 'border-b-2', 'border-blue-500');
-            documentsTab.classList.add('text-gray-500');
-            auditTab.classList.add('text-gray-900', 'border-b-2', 'border-blue-500');
-            auditTab.classList.remove('text-gray-500');
+    // Tab switching functionality
+    setTimeout(function () {
+      const documentsTab = document.getElementById("documents-tab");
+      const auditTab = document.getElementById("audit-tab");
+      const documentsContent = document.getElementById("documents-content");
+      const auditContent = document.getElementById("audit-content");
 
-            documentsTab.addEventListener('click', function () {
-                // Show Documents tab
-                documentsContent.classList.remove('hidden');
-                auditContent.classList.add('hidden');
-                documentsTab.classList.add('text-gray-900', 'border-b-2', 'border-blue-500');
-                documentsTab.classList.remove('text-gray-500');
-                auditTab.classList.remove('text-gray-900', 'border-b-2', 'border-blue-500');
-                auditTab.classList.add('text-gray-500');
-            });
+      if (!documentsTab || !auditTab || !documentsContent || !auditContent) {
+        console.error("One or more elements not found");
+        return;
+      }
 
-            auditTab.addEventListener('click', function () {
-                // Show Audit Trail tab
-                documentsContent.classList.add('hidden');
-                auditContent.classList.remove('hidden');
-                documentsTab.classList.remove('text-gray-900', 'border-b-2', 'border-blue-500');
-                documentsTab.classList.add('text-gray-500');
-                auditTab.classList.add('text-gray-900', 'border-b-2', 'border-blue-500');
-                auditTab.classList.remove('text-gray-500');
-            });
-        }, 100); // Small delay to ensure DOM is ready
-    });
+      // Initial state - show Audit Trail
+      documentsContent.classList.add("hidden");
+      auditContent.classList.remove("hidden");
+      documentsTab.classList.remove(
+        "text-gray-900",
+        "border-b-2",
+        "border-blue-500"
+      );
+      documentsTab.classList.add("text-gray-500");
+      auditTab.classList.add("text-gray-900", "border-b-2", "border-blue-500");
+      auditTab.classList.remove("text-gray-500");
+
+      documentsTab.addEventListener("click", function () {
+        // Show Documents tab
+        documentsContent.classList.remove("hidden");
+        auditContent.classList.add("hidden");
+        documentsTab.classList.add(
+          "text-gray-900",
+          "border-b-2",
+          "border-blue-500"
+        );
+        documentsTab.classList.remove("text-gray-500");
+        auditTab.classList.remove(
+          "text-gray-900",
+          "border-b-2",
+          "border-blue-500"
+        );
+        auditTab.classList.add("text-gray-500");
+      });
+
+      auditTab.addEventListener("click", function () {
+        // Show Audit Trail tab
+        documentsContent.classList.add("hidden");
+        auditContent.classList.remove("hidden");
+        documentsTab.classList.remove(
+          "text-gray-900",
+          "border-b-2",
+          "border-blue-500"
+        );
+        documentsTab.classList.add("text-gray-500");
+        auditTab.classList.add(
+          "text-gray-900",
+          "border-b-2",
+          "border-blue-500"
+        );
+        auditTab.classList.remove("text-gray-500");
+      });
+    }, 100); // Small delay to ensure DOM is ready
+  });
 </script>
 
 {% endblock %}

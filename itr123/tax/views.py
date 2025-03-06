@@ -24,7 +24,6 @@ def tax_questions(request):
         user_name = request.POST.get('name')
         tax_year = request.POST.get('tax_year')
         income_type = request.POST.get('income_type')
-        filing_status = request.POST.get('filing_status')
         previous_filing = request.POST.get('previous_filing')
 
         user_phone = request.session.get('user_phone')
@@ -56,7 +55,6 @@ def tax_questions(request):
             file.write(f"Name: {user_name}\n")
             file.write(f"Tax Year: {tax_year}\n")
             file.write(f"Income Type: {income_type}\n")
-            file.write(f"Filing Status: {filing_status}\n")
             file.write(f"Previous Filing: {previous_filing}\n")
             file.write(f"Status: Pending\n")
             file.write(f"\nSubmission Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")

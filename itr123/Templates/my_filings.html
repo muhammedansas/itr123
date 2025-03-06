@@ -60,15 +60,29 @@
                                 {% endif %}
                             </p>
                         </div>
-                        {% if request.session.user_type != 'ca' %}
-                        <a href="{% url 'tax_questions' %}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium">
-                            New Tax File
-                        </a>
-                        {% endif %}
+                        <div class="flex items-center space-x-4">
+                            {% if request.session.user_type != 'ca' %}
+                            <a href="{% url 'tax_questions' %}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium">
+                                New Tax File
+                            </a>
+                            {% endif %}
+                            <!-- Filter Dropdown -->
+                            <div class="relative">
+                                <select id="statusFilter" class="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-blue-500">
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="payment-pending">Payment Pending</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Filings List -->
                 <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-up">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">
                         {% if request.session.user_type == 'ca' %}
@@ -80,7 +94,7 @@
                     
                     {% if request.session.user_type == 'ca' %}
                         {% for filing in client_filings %}
-                        <div class="border rounded-lg p-4 mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-md">
+                        <div class="filing-item border rounded-lg p-4 mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-md" data-status="{{ filing.filing_status }}">
                             <a href="{% url 'view_tax_filing' filing_id=filing.id %}" class="block">
                                 <div class="flex justify-between items-center mb-2">
                                     <h4 class="text-lg font-semibold text-gray-800">
@@ -89,8 +103,16 @@
                                     <span class="px-2 py-1 rounded-full text-xs font-semibold 
                                         {% if filing.filing_status == 'completed' %}bg-green-100 text-green-800
                                         {% elif filing.filing_status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif filing.filing_status == 'payment-pending' %}bg-orange-100 text-orange-800
+                                        {% elif filing.filing_status == 'in-progress' %}bg-blue-100 text-blue-800
                                         {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                        {{ filing.filing_status }}
+                                        {% if filing.filing_status == 'in-progress' %}
+                                            In Progress
+                                        {% elif filing.filing_status == 'payment-pending' %}
+                                            Payment Pending
+                                        {% else %}
+                                            {{ filing.filing_status|title }}
+                                        {% endif %}
                                     </span>
                                 </div>
                                 <p class="text-gray-600 mb-2">Tax Year: {{ filing.tax_year }}</p>
@@ -104,7 +126,7 @@
                     
                     {% else %}
                         {% for filing in tax_filings %}
-                        <div class="border rounded-lg p-4 mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-md">
+                        <div class="filing-item border rounded-lg p-4 mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-md" data-status="{{ filing.filing_status }}">
                             <a href="{% url 'view_tax_filing' filing_id=filing.id %}" class="block">
                                 <div class="flex justify-between items-center mb-2">
                                     <h4 class="text-lg font-semibold text-gray-800">
@@ -112,9 +134,17 @@
                                     </h4>
                                     <span class="px-2 py-1 rounded-full text-xs font-semibold 
                                         {% if filing.filing_status == 'completed' %}bg-green-100 text-green-800
-                                        {% elif filing.filing_status == 'in-progress' %}bg-yellow-100 text-yellow-800
+                                        {% elif filing.filing_status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif filing.filing_status == 'payment-pending' %}bg-orange-100 text-orange-800
+                                        {% elif filing.filing_status == 'in-progress' %}bg-blue-100 text-blue-800
                                         {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                        {{ filing.filing_status|default:"N/A" }}
+                                        {% if filing.filing_status == 'in-progress' %}
+                                            In Progress
+                                        {% elif filing.filing_status == 'payment-pending' %}
+                                            Payment Pending
+                                        {% else %}
+                                            {{ filing.filing_status|title }}
+                                        {% endif %}
                                     </span>
                                 </div>
                                 <p class="text-gray-600 mb-2">Tax Year: {{ filing.tax_year }}</p>
@@ -132,7 +162,7 @@
     </div>
 </div>
 
-<!-- Custom Animations -->
+<!-- Custom Animations and Filter Script -->
 <style>
     @keyframes fade-in {
         from { opacity: 0; transform: translateY(-10px); }
@@ -145,4 +175,40 @@
     .animate-fade-in { animation: fade-in 0.8s ease-out; }
     .animate-slide-up { animation: slide-up 0.8s ease-out; }
 </style>
+
+<script>
+    // Wait for DOM to fully load
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('statusFilter');
+        
+        // Only proceed if the filter exists
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                const selectedStatus = this.value;
+                const filingItems = document.querySelectorAll('.filing-item');
+                
+                console.log('Filter changed to:', selectedStatus); // Debug log
+                
+                filingItems.forEach(item => {
+                    const itemStatus = item.getAttribute('data-status');
+                    console.log('Item status:', itemStatus); // Debug log
+                    
+                    if (selectedStatus === 'all' || itemStatus === selectedStatus) {
+                        item.style.display = 'block';
+                        // Reapply animation
+                        item.classList.remove('animate-slide-up');
+                        setTimeout(function() {
+                            item.classList.add('animate-slide-up');
+                        }, 10);
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Initialize filter on page load
+            statusFilter.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
 {% endblock %}

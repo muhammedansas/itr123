@@ -15,46 +15,6 @@ import io
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 CA_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ca_data')
 
-@csrf_exempt
-def save_message(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_phone = data.get("phone")  # Ensure correct variable usage
-            tax_file_name = data.get("tax_file_name")
-            tax_year = data.get("tax_year")
-            message = data.get("message")
-            name = request.session.get("user_name", "Unknown")  # Default if missing
-
-            # Validate required fields
-            if not user_phone or not tax_file_name or not tax_year or not message:
-                return JsonResponse({"status": "error", "message": "Missing required fields"})
-
-            # Construct the user folder path
-            user_folder = os.path.join(DATA_DIR, user_phone, tax_file_name, tax_year)
-
-            # Check if the directory exists
-            if not os.path.exists(user_folder):
-                return JsonResponse({"status": "error", "message": f"Directory not found: {user_folder}"})
-
-            # Audit trail file path
-            message_file_path = os.path.join(user_folder, "audit_trail.txt")
-
-            # Format message correctly
-            formatted_message = f"Name: {name}\nMessage: {message}\n{'-' * 40}\n"
-
-            # Append message to the file
-            with open(message_file_path, "a") as file:
-                file.write(formatted_message)
-
-            return JsonResponse({"status": "success", "message": "Message saved successfully"})
-
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": f"Error: {str(e)}"})
-
-    return JsonResponse({"status": "error", "message": "Invalid request method"})
-
-
 def tax_questions(request):
     if not request.session.get('user_phone'):
         return redirect('signin')
@@ -124,51 +84,43 @@ def tax_questions(request):
 def user_home(request):
     tax_filings = []
     client_filings = []
-
     user_phone = request.session.get('user_phone')
     user_type = request.session.get('user_type')
-
+    
     if user_type == 'user' and user_phone:
         user_base_folder = os.path.join(DATA_DIR, user_phone)
         if os.path.exists(user_base_folder):
             tax_filings = get_tax_filings(user_base_folder, user_phone)
-
     elif user_type == 'ca' and user_phone:
         ca_base_folder = os.path.join(CA_DATA_DIR, user_phone, 'ca_mapping.txt')
-
         if os.path.exists(ca_base_folder):
             with open(ca_base_folder, 'r') as file:
                 mapped_clients = file.read().splitlines()
-
             for client_phone in mapped_clients:
                 client_base_folder = os.path.join(DATA_DIR, client_phone)
                 if os.path.exists(client_base_folder):
                     client_filings.extend(get_tax_filings(client_base_folder, client_phone, is_ca=True))
+    
     context = {
         'tax_filings': tax_filings if user_type == 'user' else [],
         'client_filings': client_filings if user_type == 'ca' else [],
-        'total_clients': len(client_filings),
-        'completed_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'Completed'),
-        'pending_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'Pending'),
+        'total_clients': len(set(f['client_name'] for f in client_filings)) if user_type == 'ca' else 0,
+        'completed_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'completed'),
+        'pending_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'pending'),
     }
-
     return render(request, 'user_home.html', context)
 
 def get_tax_filings(base_folder, user_phone, is_ca=False):
     tax_filings = []
-    
+   
     for name_folder in os.listdir(base_folder):
         name_path = os.path.join(base_folder, name_folder)
-
         if not os.path.isdir(name_path) or name_folder.startswith('.'):
             continue
-
         for tax_year in os.listdir(name_path):
             year_path = os.path.join(name_path, tax_year)
-
             if not os.path.isdir(year_path) or not tax_year.isdigit():
                 continue
-
             tax_details_path = os.path.join(year_path, 'tax_details.txt')
             if os.path.exists(tax_details_path):
                 filing_info = {
@@ -177,16 +129,39 @@ def get_tax_filings(base_folder, user_phone, is_ca=False):
                     'name': name_folder,
                     'client_name': name_folder if is_ca else None,
                 }
-
+                
+                # Read the entire tax_details.txt file
                 with open(tax_details_path, 'r') as file:
                     details = file.read()
-
-                    filing_status_match = re.search(r'Filing Status: (.+)', details)
-                    filing_info['filing_status'] = filing_status_match.group(1) if filing_status_match else 'Unknown'
-
+                    
+                    # Extract important fields using regex
+                    name_match = re.search(r'Name: (.+)', details)
+                    if name_match:
+                        filing_info['name'] = name_match.group(1).strip()
+                    
+                    # Extract the Status field - exactly as shown in your example
+                    status_match = re.search(r'Status: (.+)', details)
+                    print(status_match,"llll")
+                    if status_match:
+                        raw_status = status_match.group(1).strip().lower()
+                        
+                        # Map the status to the filter options
+                        status_mapping = {
+                            'pending': 'pending',
+                            'in progress': 'in-progress',
+                            'payment pending': 'payment-pending',
+                            'completed': 'completed'
+                        }
+                        filing_info['filing_status'] = status_mapping.get(raw_status, raw_status)
+                        print(filing_info)
+                    else:
+                        filing_info['filing_status'] = 'unknown'
+                    
+                    # Extract the Submission Date field
                     date_match = re.search(r'Submission Date: (.+)', details)
                     filing_info['filed_date'] = date_match.group(1) if date_match else 'Unknown'
-
+                
+                # Get the list of documents
                 documents_folder = os.path.join(year_path, 'documents')
                 filing_info['documents'] = (
                     [doc for doc in os.listdir(documents_folder) if os.path.isfile(os.path.join(documents_folder, doc))]
@@ -194,9 +169,8 @@ def get_tax_filings(base_folder, user_phone, is_ca=False):
                     else []
                 )
                 filing_info['num_documents'] = len(filing_info['documents'])
-
                 tax_filings.append(filing_info)
-
+    
     return tax_filings
 
 def get_audit_trail(request):
@@ -218,6 +192,50 @@ def get_audit_trail(request):
     print(messages,"ccccc")
 
     return JsonResponse({"status": "success", "messages": messages})
+
+@csrf_exempt
+def save_message(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            print(data,'bbb')
+            user_phone = data.get("phone")  # Ensure correct variable usage
+            pan_number = data.get("pan_number")
+            tax_year = data.get("tax_year")
+            message = data.get("message")
+            name = request.session.get("user_name", "Unknown")  # Default if missing
+            print(pan_number,"mmmm")
+
+            # Validate required fields
+            if not user_phone or not pan_number or not tax_year or not message:
+                return JsonResponse({"status": "error", "message": "Missing required fields"})
+
+            # Construct the user folder path
+            user_folder = os.path.join(DATA_DIR, user_phone, pan_number, tax_year)
+
+            print(user_folder,"mm")
+
+            # Check if the directory exists
+            if not os.path.exists(user_folder):
+                return JsonResponse({"status": "error", "message": f"Directory not found: {user_folder}"})
+
+            # Audit trail file path
+            message_file_path = os.path.join(user_folder, "audit_trail.txt")
+
+            # Format message correctly
+            formatted_message = f"Name: {name}\nMessage: {message}\n{'-' * 40}\n"
+
+            with open(message_file_path, "a") as file:
+                file.write(formatted_message)
+
+            messages.success(request, 'Successfully Message Sended')
+            return JsonResponse({"status": "success", "message": "Message saved successfully"})
+
+        except Exception as e:
+            messages.error(request, f'Error loading Messaging: {str(e)}')
+            return JsonResponse({"status": "error", "message": f"Exception occurred: {str(e)}"}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 def view_tax_filing(request, filing_id):
     try:
@@ -279,7 +297,6 @@ def view_tax_filing(request, filing_id):
                             message = part.replace("Message: ", "").strip()
                     if name and message:
                         audit_messages.append({"name": name, "message": message})
-
         context = {
             'filing_id': filing_id,
             "pan_number": pan_number,

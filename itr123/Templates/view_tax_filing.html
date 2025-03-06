@@ -375,6 +375,7 @@
 
 <!-- Include inline script for immediate execution -->
 <script>
+  
   function uploadFile() {
     let fileInput = document.getElementById("fileInput");
     let file = fileInput.files[0];
@@ -419,7 +420,7 @@
       sendMessageButton.addEventListener("click", function () {
         const message = messageInput.value.trim();
         const taxYear = "{{ tax_year }}";
-        const name = "{{ name }}";
+        const pan_number = "{{ pan_number }}";
         const phone = "{{ user_phone }}";
         if (message === "") return;
 
@@ -432,8 +433,9 @@
           body: JSON.stringify({
             message: message,
             user_phone: "{{ request.session.user_phone }}",
-            tax_file_name: name, // Replace dynamically
-            tax_year: taxYear, // Replace dynamically
+            filing_id:"{{ filing_id }}",
+            pan_number: pan_number,
+            tax_year: taxYear,
             phone: phone,
           }),
         })

@@ -67,7 +67,6 @@
             </div>
         </div>
     </nav>
-
     {% if messages %}
         <div class="fixed top-4 right-4 z-50 space-y-2" id="message-container">
             {% for message in messages %}
@@ -93,17 +92,13 @@
             {% endfor %}
         </div>
     {% endif %}
-
     {% block content %}
     {% endblock %}
-
-
     <footer class="bg-gradient-to-r from-blue-800 to-blue-900 text-white py-8 mt-8">
         <div class="container mx-auto text-center">
             <p class="text-blue-200">&copy; 2025 Tax Management System. All rights reserved.</p>
         </div>
     </footer>
-
     {% block script %}
     <script>
         function closeMessage(button) {

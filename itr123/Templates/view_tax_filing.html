@@ -329,18 +329,18 @@
                 <div id="uploadStatus" class="mt-2 text-sm text-gray-600"></div>
               </div>
             </div>
-            <!-- Audit Trail content section -->
             <div id="audit-content" class="p-6">
               <h2 class="text-lg font-medium text-gray-900 mb-6">
                 Communication Audit Trail
               </h2>
-
-              <div
-                id="audit-messages"
-                class="space-y-2 bg-gray-100 p-4 rounded-lg"
+            
+              <!-- Fixed height message container with scrolling -->
+              <div 
+                id="audit-messages" 
+                class="space-y-2 bg-gray-100 p-4 rounded-lg h-80 overflow-y-auto flex flex-col"
               >
                 {% for msg in audit_messages %}
-                <div class="p-2 bg-white shadow rounded-md">
+                <div class="p-2 bg-white shadow rounded-md my-1">
                   <strong class="text-gray-800">{{ msg.name }}</strong>:
                   <p class="text-gray-600">{{ msg.message }}</p>
                 </div>
@@ -350,22 +350,23 @@
               </div>
 
               <!-- Message input area -->
-              <div class="mt-6">
-                <div class="relative">
-                  <textarea
-                    id="message-input"
-                    class="w-full p-2 border border-gray-300 rounded-lg"
-                    placeholder="Type your message..."
-                  ></textarea>
-                  <button
-                    id="send-message"
-                    class="absolute bottom-2 right-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Send
-                  </button>
-                </div>
-              </div>
-            </div>
+  <div class="mt-6">
+    <div class="relative">
+      <textarea
+        id="message-input"
+        class="w-full p-2 border border-gray-300 rounded-lg"
+        placeholder="Type your message..."
+        rows="3"
+      ></textarea>
+      <button
+        id="send-message"
+        class="absolute bottom-2 right-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+      >
+        Send
+      </button>
+    </div>
+  </div>
+</div>
           </div>
         </div>
       </div>
@@ -375,7 +376,6 @@
 
 <!-- Include inline script for immediate execution -->
 <script>
-  
   function uploadFile() {
     let fileInput = document.getElementById("fileInput");
     let file = fileInput.files[0];
@@ -411,7 +411,14 @@
           '<span class="text-red-600">Error uploading file.</span>';
       });
   }
+  
   document.addEventListener("DOMContentLoaded", function () {
+    // Scroll to bottom of messages when page loads
+    const auditMessages = document.getElementById("audit-messages");
+    if (auditMessages) {
+      auditMessages.scrollTop = auditMessages.scrollHeight;
+    }
+    
     // Message sending functionality
     const sendMessageButton = document.getElementById("send-message");
     const messageInput = document.getElementById("message-input");
@@ -442,13 +449,32 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.status === "success") {
-              console.log("Message saved successfully!");
+              // Add the new message to the container
+              const newMessage = document.createElement("div");
+              newMessage.className = "p-2 bg-white shadow rounded-md my-1";
+              newMessage.innerHTML = `
+                <strong class="text-gray-800">{{ request.session.user_name }}</strong>:
+                <p class="text-gray-600">${message}</p>
+              `;
+              
+              auditMessages.appendChild(newMessage);
+              
+              // Clear input and scroll to bottom
               messageInput.value = "";
+              auditMessages.scrollTop = auditMessages.scrollHeight;
             } else {
               console.error("Error saving message");
             }
           })
           .catch((error) => console.error("Error:", error));
+      });
+      
+      // Allow sending message with Enter key (Shift+Enter for new line)
+      messageInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessageButton.click();
+        }
       });
     }
 

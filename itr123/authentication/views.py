@@ -8,6 +8,12 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 CA_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ca_data')
 
 def home(request):
+    if request.session.get('user_phone'):
+        if request.session.get('user_type') == 'ca':
+            return redirect('user_home')
+        else:
+            return redirect('user_home')
+
     return render(request, 'home.html')
 
 def signup(request):

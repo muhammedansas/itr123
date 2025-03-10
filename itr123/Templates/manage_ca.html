@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Manage CA - {{ ca.name|default:"Unknown CA" }}{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 fade-in">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold text-blue-800">Manage CA: <span class="text-blue-600">{{ ca.name|default:"Unknown CA" }}</span></h1>
+        <a href="{% url 'admin_dashboard' %}" class="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 shadow-md hover:shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6 slide-in">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-100 p-3 rounded-full">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-gray-500">Phone Number</p>
+                <p class="text-lg font-semibold">{{ ca.phone }}</p>
+            </div>
+            <div class="ml-8">
+                <p class="text-gray-500">Assigned Users</p>
+                <p class="text-lg font-semibold">{{ assigned_users|length }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
+                <h2 class="text-white text-xl font-bold flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Assign Users to CA
+                </h2>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="{% url 'update_ca_mapping' ca_phone=ca.phone %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="space-y-2">
+                        <label for="userList" class="block text-gray-700 font-medium">Select Users to Assign:</label>
+                        <select multiple class="form-select w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="userList" name="user_phones" size="10">
+                            {% for user in users %}
+                                {% if user.phone in assigned_users or not user.assigned_ca %}
+                                <option value="{{ user.phone }}" {% if user.phone in assigned_users %}selected{% endif %} class="py-2 px-2 {% if user.phone in assigned_users %}bg-blue-50{% endif %}">
+                                    {{ user.name|default:"Unknown User" }} ({{ user.phone }})
+                                    {% if not user.assigned_ca and user.phone not in assigned_users %}
+                                    <span class="text-green-600 ml-2">- Unassigned</span>
+                                    {% endif %}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <p class="text-sm text-gray-500 flex items-center mt-1">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Hold Ctrl (or Cmd on Mac) to select multiple users
+                        </p>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300 shadow hover:shadow-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Save Assignments
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
+                <h2 class="text-white text-xl font-bold flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Currently Assigned Users
+                </h2>
+            </div>
+            <div class="p-0">
+                <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                    {% for user_phone in assigned_users %}
+                        {% for user in users %}
+                            {% if user.phone == user_phone %}
+                            <div class="p-4 hover:bg-blue-50 transition duration-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium text-gray-900">{{ user.name|default:"Unknown User" }}</h3>
+                                            <p class="text-sm text-gray-500">{{ user.phone }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% empty %}
+                    <div class="p-8 text-center">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <p class="text-gray-500">No users currently assigned to this CA</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+<script>
+    // Animation to highlight saved changes
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there's a success message
+        const successMessage = document.querySelector('.notification.from-green-500');
+        if (successMessage) {
+            // Add a highlight effect to the assigned users section
+            const assignedUsersCard = document.querySelectorAll('.card-hover')[1];
+            assignedUsersCard.classList.add('ring-4', 'ring-green-300');
+            setTimeout(() => {
+                assignedUsersCard.classList.remove('ring-4', 'ring-green-300');
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

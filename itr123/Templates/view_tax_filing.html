@@ -335,9 +335,10 @@
                 Communication Audit Trail
               </h2>
 
+              <!-- Modified message container with fixed height and scrollbar -->
               <div
                 id="audit-messages"
-                class="space-y-2 bg-gray-100 p-4 rounded-lg"
+                class="space-y-2 bg-gray-100 p-4 rounded-lg max-h-80 overflow-y-auto"
               >
                 {% for msg in audit_messages %}
                 <div class="p-2 bg-white shadow rounded-md">
@@ -415,6 +416,12 @@
     // Message sending functionality
     const sendMessageButton = document.getElementById("send-message");
     const messageInput = document.getElementById("message-input");
+    const auditMessages = document.getElementById("audit-messages");
+
+    // Scroll to bottom of messages on load
+    if (auditMessages) {
+      auditMessages.scrollTop = auditMessages.scrollHeight;
+    }
 
     if (sendMessageButton && messageInput) {
       sendMessageButton.addEventListener("click", function () {
@@ -444,6 +451,11 @@
             if (data.status === "success") {
               console.log("Message saved successfully!");
               messageInput.value = "";
+              
+              // Scroll to bottom after sending message
+              setTimeout(() => {
+                auditMessages.scrollTop = auditMessages.scrollHeight;
+              }, 100);
             } else {
               console.error("Error saving message");
             }

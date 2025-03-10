@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'authentication',
     'tax',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

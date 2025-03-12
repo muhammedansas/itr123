@@ -85,26 +85,42 @@ def user_home(request):
     user_phone = request.session.get('user_phone')
     user_type = request.session.get('user_type')
     
-    if user_type == 'user' and user_phone:
-        user_base_folder = os.path.join(DATA_DIR, user_phone)
-        if os.path.exists(user_base_folder):
-            tax_filings = get_tax_filings(user_base_folder, user_phone)
-    elif user_type == 'ca' and user_phone:
-        ca_base_folder = os.path.join(CA_DATA_DIR, user_phone, 'ca_mapping.txt')
-        if os.path.exists(ca_base_folder):
-            with open(ca_base_folder, 'r') as file:
-                mapped_clients = file.read().splitlines()
-            for client_phone in mapped_clients:
-                client_base_folder = os.path.join(DATA_DIR, client_phone)
-                if os.path.exists(client_base_folder):
-                    client_filings.extend(get_tax_filings(client_base_folder, client_phone, is_ca=True))
+    try:
+        if user_type == 'user' and user_phone:
+            user_base_folder = os.path.join(DATA_DIR, user_phone)
+            if os.path.exists(user_base_folder):
+                tax_filings = get_tax_filings(user_base_folder, user_phone)
+        elif user_type == 'ca' and user_phone:
+            ca_base_folder = os.path.join(CA_DATA_DIR, user_phone, 'ca_mapping.txt')
+            if os.path.exists(ca_base_folder):
+                try:
+                    with open(ca_base_folder, 'r') as file:
+                        mapped_clients = file.read().splitlines()
+                    
+                    for client_phone in mapped_clients:
+                        try:
+                            client_base_folder = os.path.join(DATA_DIR, client_phone)
+                            if os.path.exists(client_base_folder):
+                                client_filings.extend(get_tax_filings(client_base_folder, client_phone, is_ca=True))
+                        except Exception as e:
+                            print(f"Error processing client {client_phone}: {e}")
+                            continue
+                except IOError as e:
+                    print(f"Error reading CA mapping file {ca_base_folder}: {e}")
+                    messages.error(request, f"Could not access your client mapping data. Please contact support.")
+            else:
+                # It seems you're trying to read ca_mapping.txt instead of using the file directly
+                print(f"CA mapping file not found: {ca_base_folder}")
+    except Exception as e:
+        print(f"Error in user_home: {e}")
+        messages.error(request, "An error occurred while loading your dashboard.")
     
     context = {
         'tax_filings': tax_filings if user_type == 'user' else [],
         'client_filings': client_filings if user_type == 'ca' else [],
-        'total_clients': len(set(f['client_name'] for f in client_filings)) if user_type == 'ca' else 0,
-        'completed_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'completed'),
-        'pending_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'pending'),
+        'total_clients': len(set(f.get('client_name', '') for f in client_filings)) if user_type == 'ca' else 0,
+        'completed_client_filings': sum(1 for f in client_filings if f.get('filing_status') == 'completed'),
+        'pending_client_filings': sum(1 for f in client_filings if f.get('filing_status') == 'pending'),
     }
     return render(request, 'user_home.html', context)
 

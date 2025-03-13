@@ -84,129 +84,90 @@ def user_home(request):
     client_filings = []
     user_phone = request.session.get('user_phone')
     user_type = request.session.get('user_type')
-    error_occurred = False
     
-    try:
-        if user_type == 'user' and user_phone:
-            try:
-                user_base_folder = os.path.join(DATA_DIR, user_phone)
-                if os.path.exists(user_base_folder):
-                    try:
-                        tax_filings = get_tax_filings(user_base_folder, user_phone)
-                    except Exception as e:
-                        print(f"Error getting tax filings for user {user_phone}: {e}")
-                        error_occurred = True
-            except Exception as e:
-                print(f"Error processing user folder: {e}")
-                error_occurred = True
-        elif user_type == 'ca' and user_phone:
-            try:
-                ca_base_folder = os.path.join(CA_DATA_DIR, user_phone, 'ca_mapping.txt')
-                if os.path.exists(ca_base_folder):
-                    try:
-                        with open(ca_base_folder, 'r') as file:
-                            mapped_clients = file.read().splitlines()
-                        
-                        for client_phone in mapped_clients:
-                            try:
-                                client_base_folder = os.path.join(DATA_DIR, client_phone)
-                                if os.path.exists(client_base_folder):
-                                    try:
-                                        client_filings_for_client = get_tax_filings(client_base_folder, client_phone, is_ca=True)
-                                        client_filings.extend(client_filings_for_client)
-                                    except Exception as e:
-                                        print(f"Error getting tax filings for client {client_phone}: {e}")
-                                        continue
-                            except Exception as e:
-                                print(f"Error processing client {client_phone}: {e}")
-                                continue
-                    except IOError as e:
-                        print(f"Error reading CA mapping file {ca_base_folder}: {e}")
-                        error_occurred = True
-                        messages.error(request, f"Could not access your client mapping data. Please contact support.")
-                else:
-                    print(f"CA mapping file not found: {ca_base_folder}")
-            except Exception as e:
-                print(f"Error processing CA data: {e}")
-                error_occurred = True
-    except Exception as e:
-        print(f"Error in user_home: {e}")
-        error_occurred = True
-        messages.error(request, "An error occurred while loading your dashboard.")
-    
-    if error_occurred:
-        messages.warning(request, "Some data may be incomplete due to system issues. Our team has been notified.")
+    if user_type == 'user' and user_phone:
+        user_base_folder = os.path.join(DATA_DIR, user_phone)
+        if os.path.exists(user_base_folder):
+            tax_filings = get_tax_filings(user_base_folder, user_phone)
+    elif user_type == 'ca' and user_phone:
+        ca_base_folder = os.path.join(CA_DATA_DIR, user_phone, 'ca_mapping.txt')
+        if os.path.exists(ca_base_folder):
+            with open(ca_base_folder, 'r') as file:
+                mapped_clients = file.read().splitlines()
+            for client_phone in mapped_clients:
+                client_base_folder = os.path.join(DATA_DIR, client_phone)
+                if os.path.exists(client_base_folder):
+                    client_filings.extend(get_tax_filings(client_base_folder, client_phone, is_ca=True))
     
     context = {
         'tax_filings': tax_filings if user_type == 'user' else [],
         'client_filings': client_filings if user_type == 'ca' else [],
-        'total_clients': len(set(f.get('client_name', '') for f in client_filings)) if user_type == 'ca' else 0,
-        'completed_client_filings': sum(1 for f in client_filings if f.get('filing_status') == 'completed'),
-        'pending_client_filings': sum(1 for f in client_filings if f.get('filing_status') == 'pending'),
+        'total_clients': len(set(f['client_name'] for f in client_filings)) if user_type == 'ca' else 0,
+        'completed_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'completed'),
+        'pending_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'pending'),
     }
     return render(request, 'user_home.html', context)
 
 def get_tax_filings(base_folder, user_phone, is_ca=False):
     tax_filings = []
    
-    try:
-        print(f"Starting to process base folder: {base_folder}")
-        name_folders = os.listdir(base_folder)
-        print(f"Found {len(name_folders)} name folders")
-        
-        for name_folder in name_folders:
-            try:
-                name_path = os.path.join(base_folder, name_folder)
-                print(f"Processing name folder: {name_path}")
-                
-                if not os.path.isdir(name_path) or name_folder.startswith('.'):
-                    continue
-                
-                tax_years = os.listdir(name_path)
-                print(f"Found {len(tax_years)} tax years in {name_path}")
-                
-                for tax_year in tax_years:
-                    try:
-                        year_path = os.path.join(name_path, tax_year)
-                        print(f"Processing year path: {year_path}")
-                        
-                        if not os.path.isdir(year_path) or not tax_year.isdigit():
-                            continue
-                        
-                        tax_details_path = os.path.join(year_path, 'tax_details.txt')
-                        print(f"Checking tax details path: {tax_details_path}")
-                        
-                        if os.path.exists(tax_details_path):
-                            print(f"Found tax details file: {tax_details_path}")
-                            filing_info = {
-                                'id': f"{user_phone}_{name_folder}_{tax_year}",
-                                'tax_year': tax_year,
-                                'name': name_folder,
-                                'client_name': name_folder if is_ca else None,
-                            }
-                            
-                            try:
-                                print(f"Attempting to read {tax_details_path}")
-                                with open(tax_details_path, 'r') as file:
-                                    details = file.read()
-                                print(f"Successfully read {tax_details_path}")
-                                
-                                # Rest of your code...
-                                
-                            except OSError as e:
-                                print(f"Error reading tax details file {tax_details_path}: {e}")
-                                filing_info['filing_status'] = 'error'
-                                filing_info['filed_date'] = 'Unknown'
-                                tax_filings.append(filing_info)
-                                continue
-                    except Exception as e:
-                        print(f"Error processing tax year {tax_year}: {e}")
-                        continue
-            except Exception as e:
-                print(f"Error processing name folder {name_folder}: {e}")
+    for name_folder in os.listdir(base_folder):
+        name_path = os.path.join(base_folder, name_folder)
+        if not os.path.isdir(name_path) or name_folder.startswith('.'):
+            continue
+        for tax_year in os.listdir(name_path):
+            year_path = os.path.join(name_path, tax_year)
+            if not os.path.isdir(year_path) or not tax_year.isdigit():
                 continue
-    except Exception as e:
-        print(f"Error in get_tax_filings for {base_folder}: {e}")
+            tax_details_path = os.path.join(year_path, 'tax_details.txt')
+            if os.path.exists(tax_details_path):
+                filing_info = {
+                    'id': f"{user_phone}_{name_folder}_{tax_year}",
+                    'tax_year': tax_year,
+                    'name': name_folder,
+                    'client_name': name_folder if is_ca else None,
+                }
+                
+                # Read the entire tax_details.txt file
+                with open(tax_details_path, 'r') as file:
+                    details = file.read()
+                    
+                    # Extract important fields using regex
+                    name_match = re.search(r'Name: (.+)', details)
+                    if name_match:
+                        filing_info['name'] = name_match.group(1).strip()
+                    
+                    # Extract the Status field - exactly as shown in your example
+                    status_match = re.search(r'Status: (.+)', details)
+                    print(status_match,"llll")
+                    if status_match:
+                        raw_status = status_match.group(1).strip().lower()
+                        
+                        # Map the status to the filter options
+                        status_mapping = {
+                            'pending': 'pending',
+                            'in progress': 'in-progress',
+                            'payment pending': 'payment-pending',
+                            'completed': 'completed'
+                        }
+                        filing_info['filing_status'] = status_mapping.get(raw_status, raw_status)
+                        print(filing_info)
+                    else:
+                        filing_info['filing_status'] = 'unknown'
+                    
+                    # Extract the Submission Date field
+                    date_match = re.search(r'Submission Date: (.+)', details)
+                    filing_info['filed_date'] = date_match.group(1) if date_match else 'Unknown'
+                
+                # Get the list of documents
+                documents_folder = os.path.join(year_path, 'documents')
+                filing_info['documents'] = (
+                    [doc for doc in os.listdir(documents_folder) if os.path.isfile(os.path.join(documents_folder, doc))]
+                    if os.path.exists(documents_folder)
+                    else []
+                )
+                filing_info['num_documents'] = len(filing_info['documents'])
+                tax_filings.append(filing_info)
     
     return tax_filings
 

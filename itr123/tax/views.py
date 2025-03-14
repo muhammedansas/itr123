@@ -109,65 +109,149 @@ def user_home(request):
     return render(request, 'user_home.html', context)
 
 def get_tax_filings(base_folder, user_phone, is_ca=False):
+    """
+    Retrieve tax filing information from the file system with robust error handling.
+    Universal implementation that works on all operating systems.
+    
+    Args:
+        base_folder (str): Base directory path containing tax filing data
+        user_phone (str): Phone number of the user
+        is_ca (bool): Flag indicating if the request is from a CA user
+        
+    Returns:
+        list: Collection of tax filing information dictionaries
+    """
+    import logging
+    import os
+    import re
+    import time
+    
+    # Set up logging
+    logger = logging.getLogger(__name__)
+    
     tax_filings = []
-   
-    for name_folder in os.listdir(base_folder):
-        name_path = os.path.join(base_folder, name_folder)
-        if not os.path.isdir(name_path) or name_folder.startswith('.'):
-            continue
-        for tax_year in os.listdir(name_path):
-            year_path = os.path.join(name_path, tax_year)
-            if not os.path.isdir(year_path) or not tax_year.isdigit():
-                continue
-            tax_details_path = os.path.join(year_path, 'tax_details.txt')
-            if os.path.exists(tax_details_path):
-                filing_info = {
-                    'id': f"{user_phone}_{name_folder}_{tax_year}",
-                    'tax_year': tax_year,
-                    'name': name_folder,
-                    'client_name': name_folder if is_ca else None,
-                }
+    
+    try:
+        # Check if base folder exists before proceeding
+        if not os.path.exists(base_folder):
+            logger.warning(f"Base folder does not exist: {base_folder}")
+            return tax_filings
+            
+        try:
+            name_folders = os.listdir(base_folder)
+        except (OSError, PermissionError) as e:
+            logger.error(f"Error listing directory {base_folder}: {e}")
+            return tax_filings
+            
+        for name_folder in name_folders:
+            try:
+                name_path = os.path.join(base_folder, name_folder)
                 
-                # Read the entire tax_details.txt file
-                with open(tax_details_path, 'r') as file:
-                    details = file.read()
+                # Skip non-directories and hidden folders
+                if not os.path.isdir(name_path) or name_folder.startswith('.'):
+                    continue
                     
-                    # Extract important fields using regex
-                    name_match = re.search(r'Name: (.+)', details)
-                    if name_match:
-                        filing_info['name'] = name_match.group(1).strip()
+                try:
+                    tax_years = os.listdir(name_path)
+                except (OSError, PermissionError) as e:
+                    logger.error(f"Error accessing folder {name_path}: {e}")
+                    continue
                     
-                    # Extract the Status field - exactly as shown in your example
-                    status_match = re.search(r'Status: (.+)', details)
-                    print(status_match,"llll")
-                    if status_match:
-                        raw_status = status_match.group(1).strip().lower()
+                for tax_year in tax_years:
+                    try:
+                        year_path = os.path.join(name_path, tax_year)
                         
-                        # Map the status to the filter options
-                        status_mapping = {
-                            'pending': 'pending',
-                            'in progress': 'in-progress',
-                            'payment pending': 'payment-pending',
-                            'completed': 'completed'
+                        # Skip non-directories and non-digit years
+                        if not os.path.isdir(year_path) or not tax_year.isdigit():
+                            continue
+                            
+                        tax_details_path = os.path.join(year_path, 'tax_details.txt')
+                        
+                        if not os.path.exists(tax_details_path):
+                            logger.warning(f"Tax details file not found: {tax_details_path}")
+                            continue
+                            
+                        filing_info = {
+                            'id': f"{user_phone}_{name_folder}_{tax_year}",
+                            'tax_year': tax_year,
+                            'name': name_folder,
+                            'client_name': name_folder if is_ca else None,
+                            'filing_status': 'unknown',
+                            'filed_date': 'Unknown',
+                            'documents': [],
+                            'num_documents': 0
                         }
-                        filing_info['filing_status'] = status_mapping.get(raw_status, raw_status)
-                        print(filing_info)
-                    else:
-                        filing_info['filing_status'] = 'unknown'
-                    
-                    # Extract the Submission Date field
-                    date_match = re.search(r'Submission Date: (.+)', details)
-                    filing_info['filed_date'] = date_match.group(1) if date_match else 'Unknown'
-                
-                # Get the list of documents
-                documents_folder = os.path.join(year_path, 'documents')
-                filing_info['documents'] = (
-                    [doc for doc in os.listdir(documents_folder) if os.path.isfile(os.path.join(documents_folder, doc))]
-                    if os.path.exists(documents_folder)
-                    else []
-                )
-                filing_info['num_documents'] = len(filing_info['documents'])
-                tax_filings.append(filing_info)
+                        
+                        # Read tax details file with retry mechanism
+                        max_retries = 3
+                        retry_delay = 0.5  # seconds
+                        
+                        for attempt in range(max_retries):
+                            try:
+                                with open(tax_details_path, 'r') as file:
+                                    details = file.read()
+                                    
+                                    # Extract important fields using regex
+                                    name_match = re.search(r'Name: (.+)', details)
+                                    if name_match:
+                                        filing_info['name'] = name_match.group(1).strip()
+                                    
+                                    # Extract the Status field
+                                    status_match = re.search(r'Status: (.+)', details)
+                                    if status_match:
+                                        raw_status = status_match.group(1).strip().lower()
+                                        
+                                        # Map the status to the filter options
+                                        status_mapping = {
+                                            'pending': 'pending',
+                                            'in progress': 'in-progress',
+                                            'payment pending': 'payment-pending',
+                                            'completed': 'completed'
+                                        }
+                                        filing_info['filing_status'] = status_mapping.get(raw_status, raw_status)
+                                    
+                                    # Extract the Submission Date field
+                                    date_match = re.search(r'Submission Date: (.+)', details)
+                                    if date_match:
+                                        filing_info['filed_date'] = date_match.group(1).strip()
+                                
+                                # If we got here, reading the file was successful
+                                break
+                                
+                            except (OSError, IOError) as e:
+                                logger.warning(f"Attempt {attempt+1}/{max_retries} failed for {tax_details_path}: {e}")
+                                if attempt < max_retries - 1:
+                                    time.sleep(retry_delay)
+                                else:
+                                    logger.error(f"Failed to read {tax_details_path} after {max_retries} attempts")
+                        
+                        # Get the list of documents with error handling
+                        documents_folder = os.path.join(year_path, 'documents')
+                        try:
+                            if os.path.exists(documents_folder) and os.path.isdir(documents_folder):
+                                doc_files = []
+                                try:
+                                    for doc in os.listdir(documents_folder):
+                                        doc_path = os.path.join(documents_folder, doc)
+                                        if os.path.isfile(doc_path):
+                                            doc_files.append(doc)
+                                except (OSError, PermissionError) as e:
+                                    logger.error(f"Error listing documents in {documents_folder}: {e}")
+                                
+                                filing_info['documents'] = doc_files
+                                filing_info['num_documents'] = len(doc_files)
+                        except Exception as e:
+                            logger.error(f"Error processing documents folder {documents_folder}: {e}")
+                        
+                        tax_filings.append(filing_info)
+                    except Exception as e:
+                        logger.error(f"Error processing tax year {tax_year} in {name_path}: {e}")
+                        continue
+            except Exception as e:
+                logger.error(f"Error processing name folder {name_folder} in {base_folder}: {e}")
+                continue
+    except Exception as e:
+        logger.error(f"Unexpected error in get_tax_filings for {base_folder}: {e}")
     
     return tax_filings
 

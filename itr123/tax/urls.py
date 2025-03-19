@@ -10,7 +10,6 @@ urlpatterns = [
     path('tax/view/<str:filing_id>/', views.view_tax_filing, name='view_tax_filing'),
     path('myfilings/', views.my_filings, name='myfilings'),
     path("save-message/", views.save_message, name="save_message"),
-    path('get_audit_trail/', views.get_audit_trail, name='get_audit_trail'),
     path("download-all-docs/<str:filing_id>/", views.download_all_documents, name="download_all_docs"),
     path('upload-document/', views.upload_document, name='upload_document'),
 ]

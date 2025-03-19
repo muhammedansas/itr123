@@ -1,137 +1,490 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-3xl mx-auto">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Tax Filing Information</h1>
-            <p class="text-gray-600 mt-1">Complete all required information to proceed with your tax filing.</p>
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-5 animate-fade-in">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Tax Filing Information</h1>
+            <p class="text-gray-600 text-sm mt-1">Complete the required information to proceed with your tax filing</p>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md overflow-hidden fade-in">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-slide-up">
             <div class="w-full bg-gray-100 h-1.5">
-                <div class="w-1/4 h-full bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                <div id="progress-bar" class="w-1/4 h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"></div>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" class="p-6">
+            <form method="POST" enctype="multipart/form-data" class="p-5">
                 {% csrf_token %}
 
-                <div class="space-y-6">
-                    <!-- PAN Number -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">PAN Number <span class="text-red-500">*</span></label>
-                        <input type="text" name="pan_number" placeholder="Enter PAN Number" required
-                               class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
-                                      focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                <!-- Step 1: Personal Information (KYC) -->
+                <div id="step-1" class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-800 pb-2 border-b flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span>
+                        Personal Information
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Name -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" placeholder="Full name" required
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                        </div>
+
+                        <!-- PAN Details -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">PAN Number <span class="text-red-500">*</span></label>
+                            <input type="text" name="pan_number" placeholder="Enter PAN Number" required
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                        </div>
                     </div>
 
-                    <!-- Name -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="name" placeholder="Enter your name" required
-                               class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
-                                      focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Upload PAN Card <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="file" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                            <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Tax Year Dropdown -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Tax Year <span class="text-red-500">*</span></label>
-                        <select name="tax_year" required
-                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
-                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
-                            <option value="" disabled selected>Select Tax Year</option>
-                            {% for year in years %}
-                            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Tax Year Dropdown -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Tax Year <span class="text-red-500">*</span></label>
+                            <select name="tax_year" required
+                                    class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                                <option value="" disabled selected>Select Tax Year</option>
+                                {% for year in years %}
+                                <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Aadhaar Number -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Aadhaar Number <span class="text-red-500">*</span></label>
+                            <input type="text" name="aadhaar_number" placeholder="Enter Aadhaar Number" required
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                        </div>
                     </div>
 
-                    <!-- Income Type Dropdown -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Income Type <span class="text-red-500">*</span></label>
-                        <select name="income_type" required
-                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
-                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
-                            <option value="" disabled selected>Select Income Type</option>
-                            <option value="Salary">Salary</option>
-                            <option value="House Property">House Property</option>
-                            <option value="Capital Gains">Capital Gains</option>
-                            <option value="Business/Profession">Business/Profession</option>
-                            <option value="Other Sources">Other Sources</option>
-                        </select>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Upload Aadhaar Card (Both Sides) <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="file" name="aadhaar_card" accept=".pdf,.jpg,.jpeg,.png" required multiple
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                            <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Previous Tax Filing Dropdown -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Have you filed taxes before? <span class="text-red-500">*</span></label>
-                        <select name="previous_filing" required
-                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
-                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
-                            <option value="" disabled selected>Select an option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Mobile -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Mobile Number <span class="text-red-500">*</span></label>
+                            <input type="text" name="aadhaar_mobile" placeholder="Enter Mobile Number" required
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Email ID <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" placeholder="Enter Email ID" required
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                        </div>
+                    </div>
+
+                    <!-- IT Site Password -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Income Tax Website Password (if registered)</label>
+                        <div class="relative">
+                            <input type="password" name="it_password" placeholder="Enter Password" id="password"
+                                   class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                          focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <button type="button" id="togglePassword" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Required Documents Section -->
-                <div class="mt-8 space-y-6">
-                    <h2 class="text-lg font-semibold text-gray-800 pb-2 border-b">Required Documents</h2>
+                <!-- Step 2: Income Details -->
+                <div id="step-2" class="space-y-4 mt-6 hidden">
+                    <h2 class="text-lg font-semibold text-gray-800 pb-2 border-b flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2</span>
+                        Income Details
+                    </h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- PAN Card -->
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-gray-700">PAN Card <span class="text-red-500">*</span></label>
-                            <input type="file" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required
-                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
-                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
-                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
-                        </div>
-
-                        <!-- Aadhar Card -->
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-gray-700">Aadhar Card <span class="text-red-500">*</span></label>
-                            <input type="file" name="aadhar_card" accept=".pdf,.jpg,.jpeg,.png" required
-                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
-                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
-                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
-                        </div>
-
-                        <!-- Form 16 -->
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-gray-700">Form 16 <span class="text-red-500">*</span></label>
+                    <!-- Salary/Pension Details -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Salary/Pension Details (Form 16) <span class="text-red-500">*</span></label>
+                        <div class="relative">
                             <input type="file" name="form16" accept=".pdf" required
                                    class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
-                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                            <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Rent Details -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Details of Rent (if any)</label>
+                        <textarea name="rent_details" placeholder="Enter Rent Details" rows="2"
+                                  class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                         focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Tax P&L Report -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Tax P&L Report</label>
+                            <input type="file" name="tax_pl_report" accept=".xlsx"
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
                                           file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
                                           cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
 
                         <!-- Bank Statement -->
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-gray-700">Bank Statement <span class="text-red-500">*</span></label>
-                            <input type="file" name="bank_statement" accept=".pdf,.xlsx" required
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Bank Statement</label>
+                            <input type="file" name="bank_statement" accept=".pdf,.xlsx"
                                    class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
-                                          file:rounded-lg file:border-0 file:text-sm file:font-medium
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
                                           file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
                                           cursor-pointer border border-gray-300 rounded-lg p-1.5">
                         </div>
                     </div>
+
+                    <!-- Property Details -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Details of Property Bought or Sold</label>
+                        <textarea name="property_details" placeholder="Enter Property Details" rows="2"
+                                  class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                         focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                    </div>
+
+                    <!-- FD Income -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Income from FD (Treasury/Bank/Post Office/KSFE, etc)</label>
+                        <input type="text" name="fd_income" placeholder="Enter FD Income Details"
+                               class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                      focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                    </div>
+
+                    <!-- Mutual Fund Details -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Mutual Fund Transaction Details</label>
+                        <textarea name="mutual_fund_details" placeholder="Enter Mutual Fund Details" rows="2"
+                                  class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                         focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                    </div>
+
+                    <!-- Other Income -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Details of Any Other Income</label>
+                        <textarea name="other_income" placeholder="Enter Other Income Details" rows="2"
+                                  class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                         focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Housing Loan Certificate -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Housing Loan Certificate</label>
+                            <input type="file" name="housing_loan_certificate" accept=".pdf"
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                        </div>
+
+                        <!-- Life Insurance Receipts -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Life Insurance Receipts</label>
+                            <input type="file" name="life_insurance_receipts" accept=".pdf"
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                        </div>
+                    </div>
+
+                    <!-- Medical Insurance Receipts -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Medical Insurance Premium Receipts</label>
+                        <input type="file" name="medical_insurance_receipts" accept=".pdf"
+                               class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                      file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                      file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                      cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- Partnership Firm -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Partnership Firm?</label>
+                            <select name="is_partner"
+                                    class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Director in a Company -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Director in a company?</label>
+                            <select name="is_director"
+                                    class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Unlisted Shares -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Unlisted shares?</label>
+                            <select name="unlisted_shares"
+                                    class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                           focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Refund Bank Details -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Bank Details for Refund (if any)</label>
+                        <textarea name="refund_bank_details" placeholder="Enter Bank Name, Account Number, IFSC Code" rows="2"
+                                  class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                         focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                    </div>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="mt-8">
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold
-                                   py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 
-                                   transition duration-300 transform hover:-translate-y-0.5 hover:shadow-md">
-                        Continue to Next Step
+                <!-- Step 3: NRI Details (Conditional) -->
+                <div id="step-3" class="space-y-4 mt-6 hidden">
+                    <h2 class="text-lg font-semibold text-gray-800 pb-2 border-b flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">3</span>
+                        NRI Details
+                    </h2>
+                    
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-700">Are you an NRI? <span class="text-red-500">*</span></label>
+                        <select name="is_nri" required
+                                class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                       focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <!-- NRI-specific questions (hidden by default) -->
+                    <div id="nri-questions" class="space-y-4 mt-4 hidden animate-fade-in">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-xs font-medium text-gray-700">Days in India (2024-25) <span class="text-red-500">*</span></label>
+                                <input type="number" name="nri_days_in_india" placeholder="Enter Number of Days"
+                                       class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                              focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-xs font-medium text-gray-700">Days in India (2020-24) <span class="text-red-500">*</span></label>
+                                <input type="number" name="nri_days_in_india_prev" placeholder="Enter Number of Days"
+                                       class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                              focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Government ID (Resident Country) <span class="text-red-500">*</span></label>
+                            <input type="file" name="nri_govt_id" accept=".pdf,.jpg,.jpeg,.png"
+                                   class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3
+                                          file:rounded-lg file:border-0 file:text-xs file:font-medium
+                                          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                                          cursor-pointer border border-gray-300 rounded-lg p-1.5">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-700">Bank Account Details (Resident Country) <span class="text-red-500">*</span></label>
+                            <textarea name="nri_bank_details" placeholder="Enter Bank Name, Account Number, IBAN, SWIFT" rows="2"
+                                      class="w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2
+                                             focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition duration-200"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="mt-6 flex justify-between">
+                    <button type="button" id="prev-step-btn" class="hidden px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back
+                    </button>
+                    
+                    <button type="button" id="next-step-btn"
+                            class="ml-auto px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold
+                                   rounded-lg hover:from-blue-700 hover:to-indigo-700 
+                                   transition duration-300 transform hover:-translate-y-0.5 hover:shadow-md flex items-center">
+                        Continue
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    .animate-slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+    
+    .required-field-error {
+        animation: shake 0.5s ease-in-out;
+        border-color: #ef4444 !important;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+    }
+</style>
+
+<script>
+    // JavaScript to handle step-by-step form navigation
+    const steps = document.querySelectorAll('[id^="step-"]');
+    let currentStep = 0;
+    const progressBar = document.querySelector('.bg-gradient-to-r.from-blue-500');
+    const nextButton = document.getElementById('next-step-btn');
+    const form = document.querySelector('form');
+
+    function showStep(stepIndex) {
+        steps.forEach((step, index) => {
+            step.classList.toggle('hidden', index !== stepIndex);
+        });
+        
+        // Update the progress bar width
+        const progressPercentage = ((stepIndex + 1) / steps.length) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        
+        // Update button text on last step
+        if (stepIndex === steps.length - 1) {
+            nextButton.textContent = 'Submit Form';
+        } else {
+            nextButton.textContent = 'Continue to Next Step';
+        }
+    }
+
+    function validateCurrentStep() {
+        // Get all required fields in the current step
+        const currentStepEl = steps[currentStep];
+        const requiredFields = currentStepEl.querySelectorAll('[required]');
+        
+        // Check if all required fields are filled
+        let allFieldsFilled = true;
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                allFieldsFilled = false;
+                field.classList.add('border-red-500');
+                field.addEventListener('input', function() {
+                    if (this.value) {
+                        this.classList.remove('border-red-500');
+                    }
+                }, { once: true });
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        return allFieldsFilled;
+    }
+
+    // Next button click handler
+    nextButton.addEventListener('click', function() {
+        if (!validateCurrentStep()) {
+            return; // Don't proceed if required fields are empty
+        }
+        
+        if (currentStep < steps.length - 1) {
+            currentStep++;
+            showStep(currentStep);
+            window.scrollTo(0, 0); // Scroll to top when switching steps
+        } else {
+            // Submit the form when on the last step
+            form.submit();
+        }
+    });
+
+    // Show NRI questions if NRI is selected
+    document.querySelector('select[name="is_nri"]').addEventListener('change', function(e) {
+        document.getElementById('nri-questions').classList.toggle('hidden', e.target.value === 'No');
+        
+        // Make NRI fields required only when "Yes" is selected
+        const nriFields = document.getElementById('nri-questions').querySelectorAll('input, textarea');
+        if (e.target.value === 'Yes') {
+            nriFields.forEach(field => field.setAttribute('required', ''));
+        } else {
+            nriFields.forEach(field => field.removeAttribute('required'));
+        }
+    });
+
+    // Initialize first step
+    showStep(currentStep);
+</script>
 {% endblock %}

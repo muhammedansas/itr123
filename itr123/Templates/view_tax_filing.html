@@ -1,28 +1,25 @@
-{% extends 'base.html' %} {% block content %}
-<div class="flex h-screen bg-gray-50">
+{% extends 'base.html' %} 
+{% block content %}
+<div class="flex h-screen bg-gradient-to-r from-gray-50 to-blue-50">
   <!-- Sidebar with animation -->
-  <aside
-    class="w-64 bg-white border-r border-gray-200 shadow-sm transform transition-all duration-300 ease-in-out"
-  >
-    <div class="p-4 border-b border-gray-200">
-      <h1
-        class="text-xl font-bold text-blue-500 transition-colors duration-200 hover:text-blue-600"
-      >
+  <aside class="w-64 bg-white border-r border-gray-200 shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl">
+    <div class="p-6 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500 hover:from-purple-600 hover:to-blue-600">
         TaxDocuVerse
       </h1>
       {% if request.session.user_type == 'ca' %}
-      <p class="text-sm text-gray-600">CA Portal</p>
+      <p class="text-sm text-gray-600 mt-1">CA Portal</p>
       {% else %}
-      <p class="text-sm text-gray-600">User Portal</p>
+      <p class="text-sm text-gray-600 mt-1">User Portal</p>
       {% endif %}
     </div>
 
-    <div class="p-4">
+    <div class="p-6">
       <p class="text-sm font-medium text-gray-500 mb-4">Main Menu</p>
       <nav class="space-y-2">
         <a
           href="{% url 'user_home' %}"
-          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +36,7 @@
         {% if request.session.user_type == 'ca' %}
         <a
           href="{% url 'myfilings' %}"
-          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +55,7 @@
         {% else %}
         <a
           href="{% url 'myfilings' %}"
-          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -76,8 +73,8 @@
         </a>
         {% endif %}
         <a
-          href=""
-          class="flex items-center px-3 py-2 text-sm rounded-md text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 hover:translate-x-1"
+          href="#"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -96,10 +93,8 @@
       </nav>
     </div>
 
-    <div
-      class="absolute bottom-0 w-64 p-4 text-xs text-gray-500 border-t border-gray-200"
-    >
-      <p>© 2023 TaxDocuVerse</p>
+    <div class="absolute bottom-0 w-64 p-4 text-xs text-gray-500 border-t border-gray-200 bg-white">
+      <p>© 2025 TaxDocuVerse</p>
       <p>Professional tax services</p>
     </div>
   </aside>
@@ -107,17 +102,17 @@
   <!-- Main content -->
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Content area -->
-    <main class="flex-1 overflow-auto p-6">
-      <div class="max-w-7xl mx-auto">
+    <main class="flex-1 overflow-auto p-8">
+      <div class="max-w-7xl mx-auto animate-fade-in">
         <!-- Back button and header with animation -->
-        <div class="flex items-center mb-4">
+        <div class="flex items-center mb-6">
           <a
             href="{% url 'user_home' %}"
             class="mr-3 text-gray-500 hover:text-blue-500 transition-all duration-200 transform hover:scale-110 hover:-translate-x-1"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
+              class="h-6 w-6"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -128,89 +123,100 @@
               />
             </svg>
           </a>
-          <div
-            class="transition-all duration-300 transform hover:translate-x-1"
-          >
-            <h1 class="text-xl font-bold text-gray-900">Filing Details</h1>
-            <p class="text-sm text-gray-600">
+          <div class="transition-all duration-300 transform hover:translate-x-1">
+            <h1 class="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Filing Details
+            </h1>
+            <p class="text-sm text-gray-600 mt-1">
               Income Tax Return · {{ tax_year }}
             </p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up">
           <!-- Filing Information with animations -->
-          <div
-            class="lg:col-span-1 transition-all duration-300 transform hover:scale-102 hover:shadow-md"
-          >
+          <div class="lg:col-span-1">
             <div
-              class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+              class="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-transparent hover:border-blue-200 transition-all duration-300 hover:shadow-2xl"
             >
-              <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-6">
+              <div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">
                   Filing Information
                 </h2>
+                <p class="text-sm text-gray-600">Details for this tax filing</p>
+              </div>
 
+              <div class="p-6">
                 <div class="space-y-4">
                   <div
-                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-3 rounded-lg -mx-2"
                   >
-                    <span class="text-sm text-gray-600">Status</span>
+                    <span class="text-sm font-medium text-gray-600">Status</span>
                     <span
-                      class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 transition-all duration-300 hover:bg-yellow-200"
+                      class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-all duration-300 hover:scale-105
+                        {% if status == 'Pending with Customer' %}bg-yellow-100 text-yellow-800 border border-yellow-300
+                        {% elif status == 'Pending with CA' %}bg-orange-100 text-orange-800 border border-orange-300
+                        {% elif status == 'Filed' %}bg-green-100 text-green-800 border border-green-300
+                        {% else %}bg-gray-100 text-gray-800 border border-gray-300{% endif %}"
                       >{{status}}</span
                     >
                   </div>
                   <div
-                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-3 rounded-lg -mx-2"
                   >
-                    <span class="text-sm text-gray-600">Name</span>
-                    <span class="text-sm text-gray-900">{{user_name}}</span>
+                    <span class="text-sm font-medium text-gray-600">Name</span>
+                    <span class="text-sm font-medium text-gray-900">{{user_name}}</span>
                   </div>
                   <div
-                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-3 rounded-lg -mx-2"
                   >
-                    <span class="text-sm text-gray-600">Pan Number</span>
-                    <span class="text-sm text-gray-900">{{pan_number}}</span>
-                  </div>
-
-                  <div
-                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
-                  >
-                    <span class="text-sm text-gray-600">Tax Year</span>
-                    <span class="text-sm text-gray-900">{{ tax_year }}</span>
+                    <span class="text-sm font-medium text-gray-600">Pan Number</span>
+                    <span class="text-sm font-medium text-gray-900">{{pan_number}}</span>
                   </div>
 
                   <div
-                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-2 rounded-md -mx-2"
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-3 rounded-lg -mx-2"
                   >
-                    <span class="text-sm text-gray-600">Last Updated</span>
-                    <span class="text-sm text-gray-900"
+                    <span class="text-sm font-medium text-gray-600">Tax Year</span>
+                    <span class="text-sm font-medium text-gray-900">{{ tax_year }}</span>
+                  </div>
+
+                  <div
+                    class="flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 p-3 rounded-lg -mx-2"
+                  >
+                    <span class="text-sm font-medium text-gray-600">Last Updated</span>
+                    <span class="text-sm font-medium text-gray-900"
                       >{{ submission_date }}</span
                     >
                   </div>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6 pt-6 border-t border-gray-200">
                   <h3 class="text-sm font-medium text-gray-600 mb-3">
                     Update Status
                   </h3>
-                  <div class="flex space-x-2">
-                    <button
-                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Pending' %}bg-blue-100 text-blue-700 border border-blue-300{% else %}bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600{% endif %}"
-                    >
-                      Pending
-                    </button>
-                    <button
-                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'In Review' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-gray-100 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600{% endif %}"
-                    >
-                      In Review
-                    </button>
-                    <button
-                      class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform {% if status == 'Completed' %}bg-green-100 text-green-700 border border-green-300{% else %}bg-gray-100 text-gray-700 hover:bg-green-50 hover:text-green-600{% endif %}"
-                    >
-                      Completed
-                    </button>
+                  <div class="flex flex-wrap gap-2">
+                    {% for option in status_options %}
+                    <form method="POST" class="inline-block">
+                      {% csrf_token %}
+                      <button 
+                        type="submit" 
+                        name="status" 
+                        value="{{ option }}"
+                        class="px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 transform 
+                          {% if status == option %}
+                            {% if option == 'Pending with Customer' %}bg-yellow-100 text-yellow-800 border border-yellow-300
+                            {% elif option == 'Pending with CA' %}bg-orange-100 text-orange-800 border border-orange-300
+                            {% elif option == 'Filed' %}bg-green-100 text-green-800 border border-green-300
+                            {% endif %}
+                          {% else %}
+                            bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600
+                          {% endif %}"
+                      >
+                        {{ option }}
+                      </button>
+                    </form>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
@@ -218,23 +224,21 @@
           </div>
 
           <!-- Uploaded Documents with animations -->
-          <div
-            class="lg:col-span-2 transition-all duration-300 transform hover:scale-102 hover:shadow-md"
-          >
+          <div class="lg:col-span-2">
             <div
-              class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+              class="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-transparent hover:border-blue-200 transition-all duration-300 hover:shadow-2xl"
             >
               <div class="border-b border-gray-200">
                 <div class="flex">
                   <button
                     id="documents-tab"
-                    class="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-300 hover:bg-gray-50"
+                    class="px-6 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-300 hover:bg-blue-50"
                   >
                     Documents
                   </button>
                   <button
                     id="audit-tab"
-                    class="px-6 py-3 text-sm font-medium text-gray-900 border-b-2 border-blue-500 transition-all duration-300 hover:bg-blue-50"
+                    class="px-6 py-4 text-sm font-medium text-gray-900 border-b-2 border-blue-500 transition-all duration-300 hover:bg-blue-50"
                   >
                     Audit Trail
                   </button>
@@ -243,14 +247,30 @@
 
               <!-- Documents content section -->
               <div id="documents-content" class="p-6 hidden">
-                <h2 class="text-lg font-medium text-gray-900 mb-6">
-                  Uploaded Documents
-                </h2>
+                <div class="flex justify-between items-center mb-6">
+                  <h2 class="text-xl font-bold text-gray-900">
+                    Uploaded Documents
+                  </h2>
+                  {% if request.session.user_type == 'user' %}
+                  <input
+                    type="file"
+                    id="fileInput"
+                    class="hidden"
+                    onchange="uploadFile()"
+                  />
+                  <button
+                    onclick="document.getElementById('fileInput').click();"
+                    class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  >
+                    Upload New Document
+                  </button>
+                  {% endif %}
+                </div>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
                   {% for document in documents %}
                   <div
-                    class="flex items-center justify-between p-4 bg-gray-50 rounded-lg transition-all duration-300 transform hover:translate-x-1 hover:bg-blue-50 hover:shadow-md"
+                    class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl transition-all duration-300 transform hover:translate-x-1 hover:shadow-md hover:from-blue-50 hover:to-purple-50"
                   >
                     <div class="flex items-center">
                       <div
@@ -258,7 +278,7 @@
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          class="h-6 w-6"
+                          class="h-8 w-8"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -280,12 +300,14 @@
                         </p>
                       </div>
                     </div>
-                    <button
+                    <a
+                      href="{{ document.url }}"
                       class="text-blue-500 hover:text-blue-700 transition-all duration-300 transform hover:scale-125 hover:rotate-12"
+                      download
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
+                        class="h-6 w-6"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -295,75 +317,78 @@
                           clip-rule="evenodd"
                         />
                       </svg>
-                    </button>
+                    </a>
                   </div>
                   {% endfor %}
                 </div>
 
-                <!-- Button Container with Flex -->
-                <div class="mt-4 flex justify-between items-center">
-                  <!-- Download All Documents Button -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
                   <a
                     href="{% url 'download_all_docs' filing_id=filing_id %}"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg"
                   >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
                     Download All Documents
                   </a>
-                  <input
-                    type="file"
-                    id="fileInput"
-                    class="hidden"
-                    onchange="uploadFile()"
-                  />
-
-                  <!-- Upload New Document Button -->
-                  {% if request.session.user_type == 'user' %}
-                  <button
-                    onclick="document.getElementById('fileInput').click();"
-                    class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95"
-                  >
-                    Upload New Document
-                  </button>
-                  {% endif %}
                 </div>
-                <div id="uploadStatus" class="mt-2 text-sm text-gray-600"></div>
-              </div>
-            </div>
-            <!-- Audit Trail content section -->
-            <div id="audit-content" class="p-6">
-              <h2 class="text-lg font-medium text-gray-900 mb-6">
-                Communication Audit Trail
-              </h2>
-
-              <!-- Modified message container with fixed height and scrollbar -->
-              <div
-                id="audit-messages"
-                class="space-y-2 bg-gray-100 p-4 rounded-lg max-h-80 overflow-y-auto"
-              >
-                {% for msg in audit_messages %}
-                <div class="p-2 bg-white shadow rounded-md">
-                  <strong class="text-gray-800">{{ msg.name }}</strong>:
-                  <p class="text-gray-600">{{ msg.message }}</p>
-                </div>
-                {% empty %}
-                <p class="text-gray-500">No messages found.</p>
-                {% endfor %}
+                <div id="uploadStatus" class="mt-3 text-sm text-gray-600"></div>
               </div>
 
-              <!-- Message input area -->
-              <div class="mt-6">
-                <div class="relative">
-                  <textarea
-                    id="message-input"
-                    class="w-full p-2 border border-gray-300 rounded-lg"
-                    placeholder="Type your message..."
-                  ></textarea>
-                  <button
-                    id="send-message"
-                    class="absolute bottom-2 right-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Send
-                  </button>
+              <!-- Audit Trail content section -->
+              <div id="audit-content" class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                  <h2 class="text-xl font-bold text-gray-900">
+                    Communication Audit Trail
+                  </h2>
+                </div>
+
+                <!-- Modified message container with fixed height and scrollbar -->
+                <div
+                  id="audit-messages"
+                  class="space-y-3 bg-gradient-to-br from-gray-50 to-blue-50 p-4 rounded-xl max-h-96 overflow-y-auto shadow-inner"
+                >
+                  {% for msg in audit_messages %}
+                  <div class="p-4 bg-white shadow rounded-lg transition-all duration-300 hover:shadow-md hover:translate-x-1">
+                    <div class="flex justify-between items-start">
+                      <strong class="text-gray-800">{{ msg.name }}</strong>
+                      <span class="text-xs text-gray-500">{{ msg.timestamp }}</span>
+                    </div>
+                    <p class="text-gray-600 mt-1">{{ msg.message }}</p>
+                  </div>
+                  {% empty %}
+                  <p class="text-gray-500 text-center py-4 bg-white rounded-lg shadow-sm">
+                    No messages found. Start the conversation!
+                  </p>
+                  {% endfor %}
+                </div>
+
+                <!-- Message input area -->
+                <div class="mt-6">
+                  <div class="relative">
+                    <textarea
+                      id="message-input"
+                      class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+                      rows="3"
+                      placeholder="Type your message..."
+                    ></textarea>
+                    <button
+                      id="send-message"
+                      class="absolute bottom-4 right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md"
+                    >
+                      Send
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -374,9 +399,22 @@
   </div>
 </div>
 
+<!-- Custom Animations -->
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.8s ease-out; }
+  .animate-slide-up { animation: slide-up 0.8s ease-out; }
+</style>
+
 <!-- Include inline script for immediate execution -->
 <script>
-  
   function uploadFile() {
     let fileInput = document.getElementById("fileInput");
     let file = fileInput.files[0];
@@ -385,7 +423,10 @@
 
     let formData = new FormData();
     formData.append("file", file);
-    formData.append("filing_id", "{{ filing_id }}"); // Send filing_id to backend
+    formData.append("filing_id", "{{ filing_id }}");
+
+    document.getElementById("uploadStatus").innerHTML =
+      '<span class="text-blue-600">Uploading file...</span>';
 
     fetch("{% url 'upload_document' %}", {
       method: "POST",
@@ -398,20 +439,23 @@
       .then((data) => {
         if (data.success) {
           document.getElementById("uploadStatus").innerHTML =
-            '<span class="text-green-600">Upload successful!</span>';
-          location.reload(); // Refresh page to show new document
+            '<span class="text-green-600">✓ Upload successful! Refreshing...</span>';
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
         } else {
           document.getElementById("uploadStatus").innerHTML =
-            '<span class="text-red-600">Upload failed: ' +
+            '<span class="text-red-600">✗ Upload failed: ' +
             data.error +
             "</span>";
         }
       })
       .catch((error) => {
         document.getElementById("uploadStatus").innerHTML =
-          '<span class="text-red-600">Error uploading file.</span>';
+          '<span class="text-red-600">✗ Error uploading file.</span>';
       });
   }
+  
   document.addEventListener("DOMContentLoaded", function () {
     // Message sending functionality
     const sendMessageButton = document.getElementById("send-message");
@@ -424,106 +468,130 @@
     }
 
     if (sendMessageButton && messageInput) {
-      sendMessageButton.addEventListener("click", function () {
+      // Handle enter key press
+      messageInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessageButton.click();
+        }
+      });
+
+      sendMessageButton.addEventListener("click", async function () {
         const message = messageInput.value.trim();
-        const taxYear = "{{ tax_year }}";
-        const pan_number = "{{ pan_number }}";
-        const phone = "{{ user_phone }}";
         if (message === "") return;
 
-        fetch("{% url 'save_message' %}", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-          },
-          body: JSON.stringify({
-            message: message,
-            user_phone: "{{ request.session.user_phone }}",
-            filing_id:"{{ filing_id }}",
-            pan_number: pan_number,
-            tax_year: taxYear,
-            phone: phone,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.status === "success") {
-              console.log("Message saved successfully!");
-              messageInput.value = "";
-              
-              // Scroll to bottom after sending message
-              setTimeout(() => {
-                auditMessages.scrollTop = auditMessages.scrollHeight;
-              }, 100);
-            } else {
-              console.error("Error saving message");
-            }
-          })
-          .catch((error) => console.error("Error:", error));
+        // Disable input while sending
+        messageInput.disabled = true;
+        sendMessageButton.disabled = true;
+        sendMessageButton.innerHTML = 'Sending...';
+
+        // Create message element with actual user name
+        const userName = "{{ request.session.user_name }}"; // Make sure this is passed from view
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "p-4 bg-white shadow rounded-lg opacity-80 animate-pulse";
+        msgDiv.innerHTML = `
+          <div class="flex justify-between items-start">
+            <strong class="text-gray-800">${userName}</strong>
+            <span class="text-xs text-gray-500">Sending...</span>
+          </div>
+          <p class="text-gray-600 mt-1">${message}</p>
+        `;
+        auditMessages.appendChild(msgDiv);
+        auditMessages.scrollTop = auditMessages.scrollHeight;
+        
+        try {
+          const response = await fetch("{% url 'save_message' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+              message: message,
+              user_phone: "{{ request.session.user_phone }}",
+              filing_id: "{{ filing_id }}",
+              pan_number: "{{ pan_number }}",
+              tax_year: "{{ tax_year }}",
+              phone: "{{ user_phone }}",
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.status === "success") {
+            // Update message with actual timestamp and remove loading state
+            msgDiv.className = "p-4 bg-white shadow rounded-lg transition-all duration-300 hover:shadow-md hover:translate-x-1";
+            msgDiv.innerHTML = `
+              <div class="flex justify-between items-start">
+                <strong class="text-gray-800">${userName}</strong>
+                <span class="text-xs text-gray-500">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              </div>
+              <p class="text-gray-600 mt-1">${message}</p>
+            `;
+          } else {
+            msgDiv.innerHTML = `
+              <div class="text-red-500 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                Failed to send message
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          msgDiv.innerHTML = `
+            <div class="text-red-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              Network error
+            </div>
+          `;
+        } finally {
+          // Re-enable input
+          messageInput.disabled = false;
+          sendMessageButton.disabled = false;
+          sendMessageButton.innerHTML = 'Send';
+          messageInput.value = "";
+          messageInput.focus();
+        }
       });
     }
 
     // Tab switching functionality
-    setTimeout(function () {
-      const documentsTab = document.getElementById("documents-tab");
-      const auditTab = document.getElementById("audit-tab");
-      const documentsContent = document.getElementById("documents-content");
-      const auditContent = document.getElementById("audit-content");
+    const documentsTab = document.getElementById("documents-tab");
+    const auditTab = document.getElementById("audit-tab");
+    const documentsContent = document.getElementById("documents-content");
+    const auditContent = document.getElementById("audit-content");
 
-      if (!documentsTab || !auditTab || !documentsContent || !auditContent) {
-        console.error("One or more elements not found");
-        return;
-      }
-
+    if (documentsTab && auditTab && documentsContent && auditContent) {
       // Initial state - show Audit Trail
       documentsContent.classList.add("hidden");
       auditContent.classList.remove("hidden");
-      documentsTab.classList.remove(
-        "text-gray-900",
-        "border-b-2",
-        "border-blue-500"
-      );
+      documentsTab.classList.remove("text-gray-900", "border-b-2", "border-blue-500");
       documentsTab.classList.add("text-gray-500");
       auditTab.classList.add("text-gray-900", "border-b-2", "border-blue-500");
       auditTab.classList.remove("text-gray-500");
 
       documentsTab.addEventListener("click", function () {
-        // Show Documents tab
         documentsContent.classList.remove("hidden");
         auditContent.classList.add("hidden");
-        documentsTab.classList.add(
-          "text-gray-900",
-          "border-b-2",
-          "border-blue-500"
-        );
+        documentsTab.classList.add("text-gray-900", "border-b-2", "border-blue-500");
         documentsTab.classList.remove("text-gray-500");
-        auditTab.classList.remove(
-          "text-gray-900",
-          "border-b-2",
-          "border-blue-500"
-        );
+        auditTab.classList.remove("text-gray-900", "border-b-2", "border-blue-500");
         auditTab.classList.add("text-gray-500");
       });
 
       auditTab.addEventListener("click", function () {
-        // Show Audit Trail tab
         documentsContent.classList.add("hidden");
         auditContent.classList.remove("hidden");
-        documentsTab.classList.remove(
-          "text-gray-900",
-          "border-b-2",
-          "border-blue-500"
-        );
+        documentsTab.classList.remove("text-gray-900", "border-b-2", "border-blue-500");
         documentsTab.classList.add("text-gray-500");
-        auditTab.classList.add(
-          "text-gray-900",
-          "border-b-2",
-          "border-blue-500"
-        );
+        auditTab.classList.add("text-gray-900", "border-b-2", "border-blue-500");
         auditTab.classList.remove("text-gray-500");
       });
-    }, 100); // Small delay to ensure DOM is ready
+    }
   });
 </script>
 

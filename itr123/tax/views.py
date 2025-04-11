@@ -161,7 +161,7 @@ def user_home(request):
     client_filings = []
     user_phone = request.session.get('user_phone')
     user_type = request.session.get('user_type')
-    
+   
     if user_type == 'user' and user_phone:
         user_base_folder = os.path.join(DATA_DIR, user_phone)
         if os.path.exists(user_base_folder):
@@ -175,13 +175,15 @@ def user_home(request):
                 client_base_folder = os.path.join(DATA_DIR, client_phone)
                 if os.path.exists(client_base_folder):
                     client_filings.extend(get_tax_filings(client_base_folder, client_phone, is_ca=True))
-    
+   
     context = {
         'tax_filings': tax_filings if user_type == 'user' else [],
         'client_filings': client_filings if user_type == 'ca' else [],
-        'total_clients': len(set(f['client_name'] for f in client_filings)) if user_type == 'ca' else 0,
-        'completed_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'completed'),
-        'pending_client_filings': sum(1 for f in client_filings if f['filing_status'] == 'pending'),
+        'total_clients': len(set(f.get('client_name') for f in client_filings if f.get('client_name'))) if user_type == 'ca' else len(tax_filings),
+        'filed_client_filings': sum(1 for f in client_filings if f.get('filing_status', '').lower() == 'filed') if user_type == 'ca' else 0,
+        'pending_client_filings': sum(1 for f in client_filings if f.get('filing_status', '').lower() in ['pending with customer', 'pending with ca']) if user_type == 'ca' else 0,
+        'filed_filings': sum(1 for f in tax_filings if f.get('filing_status', '').lower() == 'filed') if user_type == 'user' else 0,
+        'pending_filings': sum(1 for f in tax_filings if f.get('filing_status', '').lower() in ['pending with customer', 'pending with ca']) if user_type == 'user' else 0,
     }
     return render(request, 'user_home.html', context)
 
@@ -364,38 +366,89 @@ def save_message(request):
 
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
+def update_tax_filing_status(user_phone, name, tax_year, new_status):
+    """
+    Update the status in the tax details file
+    """
+    tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
+    
+    # Read existing details
+    with open(tax_details_path, 'r') as file:
+        lines = file.readlines()
+    
+    # Update status
+    updated_lines = []
+    for line in lines:
+        if line.startswith('Status: '):
+            updated_lines.append(f'Status: {new_status}\n')
+        else:
+            updated_lines.append(line)
+    
+    # Write back to file
+    with open(tax_details_path, 'w') as file:
+        file.writelines(updated_lines)
+
 def view_tax_filing(request, filing_id):
     try:
+        # Existing code for extracting filing details
         user_phone, name, tax_year = filing_id.split('_')
         session_phone = request.session.get('user_phone')
         user_type = request.session.get('user_type')
 
+        # Authorization checks
         if user_type == 'user' and session_phone != user_phone:
             messages.error(request, 'Unauthorized access')
             return redirect('user_home')
-
+        
         if user_type == 'ca':
             ca_mapping_path = os.path.join(CA_DATA_DIR, session_phone, 'ca_mapping.txt')
             if not os.path.exists(ca_mapping_path) or user_phone not in open(ca_mapping_path).read().splitlines():
                 messages.error(request, 'Unauthorized access')
                 return redirect('user_home')
 
-        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
-        documents_folder = os.path.join(DATA_DIR, user_phone, name, tax_year, 'documents')
-        audit_trail_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'audit_trail.txt')
+        # Status options
+        STATUS_OPTIONS = [
+            'Pending with Customer', 
+            'Pending with CA', 
+            'Filed'
+        ]
 
         # Read tax details
+        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
         tax_details_lines = []
         with open(tax_details_path, 'r') as file:
             for line in file.read().split('\n'):
                 if ': ' in line:
                     parts = line.split(': ', 1)
                     tax_details_lines.append({'label': parts[0], 'value': parts[1]})
+        
         tax_details_dict = {item["label"]: item["value"] for item in tax_details_lines}
+        
+        # Read current status
+        current_status = tax_details_dict.get("Status", "Pending with Customer")
+
+        # Handle status update via POST request
+        if request.method == 'POST':
+            new_status = request.POST.get('status')
+            
+            # Allow status change for both user and CA
+            if new_status in STATUS_OPTIONS:
+                update_tax_filing_status(user_phone, name, tax_year, new_status)
+                messages.success(request, 'Status updated successfully')
+                return redirect('view_tax_filing', filing_id=filing_id)
+            else:
+                messages.error(request, 'Invalid status')
+                return redirect('view_tax_filing', filing_id=filing_id)
+
+        # Rest of the existing code for extracting details
         pan_number = tax_details_dict.get("PAN Number")
         user_name = tax_details_dict.get("Name")
         submission_date = tax_details_dict.get("Submission Date")
-        status = tax_details_dict.get("Status")
+        status = current_status
+
+        # Read documents and audit trail
+        documents_folder = os.path.join(DATA_DIR, user_phone, name, tax_year, 'documents')
+        audit_trail_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'audit_trail.txt')
 
         # Read documents
         documents = []
@@ -408,7 +461,7 @@ def view_tax_filing(request, filing_id):
                         'file_type': get_file_type(filename),
                     })
 
-        # Read and format audit trail messages
+        # Read audit trail
         audit_messages = []
         if os.path.exists(audit_trail_path):
             with open(audit_trail_path, 'r') as file:
@@ -424,6 +477,7 @@ def view_tax_filing(request, filing_id):
                             message = part.replace("Message: ", "").strip()
                     if name and message:
                         audit_messages.append({"name": name, "message": message})
+
         context = {
             'filing_id': filing_id,
             "pan_number": pan_number,
@@ -434,10 +488,12 @@ def view_tax_filing(request, filing_id):
             'tax_year': tax_year,
             'name': name,
             "user_phone": user_phone,
-            'audit_messages': audit_messages,  # Properly formatted audit messages
+            'audit_messages': audit_messages,
+            'status_options': STATUS_OPTIONS,
+            'user_type': user_type
         }
         return render(request, 'view_tax_filing.html', context)
-
+    
     except Exception as e:
         messages.error(request, f'Error loading filing: {str(e)}')
         return redirect('user_home')

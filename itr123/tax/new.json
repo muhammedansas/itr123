@@ -1,0 +1,12 @@
+{'tax_filings': [
+        {'id': '9946969883_HBJ213J_2025', 'tax_year': '2025', 'name': 'Ansas', 'client_name': None, 'filing_status': 'pending', 'filed_date': '2025-03-28 14: 28: 03', 'documents': ['aadhaar_card_0_20250328_142803.pdf', 'bank_statement_20250328_142803.pdf', 'form16_20250328_142803.pdf', 'housing_loan_certificate_20250328_142803.pdf', 'life_insurance_receipts_20250328_142803.pdf', 'medical_insurance_receipts_20250328_142803.pdf', 'pan_card_20250328_142803.pdf', 'tax_pl_report_20250328_142803.xlsx'
+            ], 'num_documents': 8
+        },
+        {'id': '9946969883_NJHN653_2025', 'tax_year': '2025', 'name': 'Sanin', 'client_name': None, 'filing_status': 'pending with ca', 'filed_date': '2025-03-28 15: 03: 46', 'documents': ['pan_card_20250328_150346.pdf'
+            ], 'num_documents': 1
+        },
+        {'id': '9946969883_NNJ276_2025', 'tax_year': '2025', 'name': 'Mishal', 'client_name': None, 'filing_status': 'pending with customer', 'filed_date': '2025-03-28 14: 42: 30', 'documents': ['aadhaar_card_0_20250328_144230.pdf', 'bank_statement_20250328_144230.pdf', 'form16_20250328_144230.pdf', 'housing_loan_certificate_20250328_144230.pdf', 'life_insurance_receipts_20250328_144230.pdf', 'medical_insurance_receipts_20250328_144230.pdf', 'pan_card_20250328_144230.jpeg', 'tax_pl_report_20250328_144230.xlsx'
+            ], 'num_documents': 8
+        }
+    ], 'client_filings': [], 'total_clients': 0, 'filed_client_filings': 0, 'pending_client_filings': 0, 'filed_filings': 0, 'pending_filings': 0
+}

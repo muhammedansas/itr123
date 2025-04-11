@@ -128,7 +128,7 @@ def tax_questions(request):
                     file.write(f"Days in India (2024-25): {nri_days_in_india}\n")
                     file.write(f"Days in India (2020-24): {nri_days_in_india_prev}\n")
                     file.write(f"NRI Bank Details: {nri_bank_details}\n")
-                file.write(f"Status: Pending\n")
+                file.write(f"Status: Pending with Customer\n")
                 file.write(f"\nSubmission Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
             request.session['tax_info'] = {
@@ -327,13 +327,11 @@ def save_message(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            print(data,'bbb')
             user_phone = data.get("phone")  # Ensure correct variable usage
             pan_number = data.get("pan_number")
             tax_year = data.get("tax_year")
             message = data.get("message")
             name = request.session.get("user_name", "Unknown")  # Default if missing
-            print(pan_number,"mmmm")
 
             # Validate required fields
             if not user_phone or not pan_number or not tax_year or not message:
@@ -341,8 +339,6 @@ def save_message(request):
 
             # Construct the user folder path
             user_folder = os.path.join(DATA_DIR, user_phone, pan_number, tax_year)
-
-            print(user_folder,"mm")
 
             # Check if the directory exists
             if not os.path.exists(user_folder):
@@ -357,7 +353,6 @@ def save_message(request):
             with open(message_file_path, "a") as file:
                 file.write(formatted_message)
 
-            messages.success(request, 'Successfully Message Sended')
             return JsonResponse({"status": "success", "message": "Message saved successfully"})
 
         except Exception as e:
@@ -664,26 +659,22 @@ def upload_document(request):
     if request.method == "POST":
         file = request.FILES.get("file")
         filing_id = request.POST.get("filing_id")
-
         if not file or not filing_id:
             return JsonResponse({"success": False, "error": "Missing file or filing ID"})
-
         try:
             user_phone, name, tax_year = filing_id.split('_')
             documents_folder = os.path.join(DATA_DIR, user_phone, name, tax_year, 'documents')
-
-            # Ensure directory exists
             os.makedirs(documents_folder, exist_ok=True)
-
-            # Save the file
             file_path = os.path.join(documents_folder, file.name)
             with open(file_path, 'wb+') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)
-
-            messages.success(request, f'File Successfully Added')
+            
+            return JsonResponse({"success": True, "message": "File successfully uploaded"})
         except Exception as e:
-            messages.error(request, f'Error Uploading documents: {str(e)}')
+            return JsonResponse({"success": False, "error": str(e)})
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"})
 
 
 def my_filings(request):

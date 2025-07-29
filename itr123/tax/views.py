@@ -1,3 +1,4 @@
+import mimetypes
 from django.shortcuts import render, redirect
 from django.contrib import messages
 import os
@@ -10,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import zipfile
 import io
+from django.views.decorators.http import require_http_methods
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -383,6 +385,62 @@ def update_tax_filing_status(user_phone, name, tax_year, new_status):
     with open(tax_details_path, 'w') as file:
         file.writelines(updated_lines)
 
+def download_tax_details(request, filing_id):
+    """
+    View for downloading tax details file
+    """
+    try:
+        # Extract filing details from filing_id
+        user_phone, name, tax_year = filing_id.split('_')
+        session_phone = request.session.get('user_phone')
+        user_type = request.session.get('user_type')
+
+        # Authorization checks
+        if user_type == 'user' and session_phone != user_phone:
+            messages.error(request, 'Unauthorized access')
+            return redirect('user_home')
+        
+        if user_type == 'ca':
+            ca_mapping_path = os.path.join(CA_DATA_DIR, session_phone, 'ca_mapping.txt')
+            if not os.path.exists(ca_mapping_path) or user_phone not in open(ca_mapping_path).read().splitlines():
+                messages.error(request, 'Unauthorized access')
+                return redirect('user_home')
+
+        # Construct the path to tax_details.txt
+        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
+        
+        # Check if file exists
+        if not os.path.exists(tax_details_path):
+            messages.error(request, 'Tax details file not found')
+            return redirect('view_tax_filing', filing_id=filing_id)
+
+        # Read the file content
+        with open(tax_details_path, 'rb') as file:
+            file_content = file.read()
+
+        # Determine the content type
+        content_type, _ = mimetypes.guess_type(tax_details_path)
+        if content_type is None:
+            content_type = 'text/plain'
+
+        # Create the response
+        response = HttpResponse(file_content, content_type=content_type)
+        
+        # Set the filename for download
+        filename = f"tax_details_{name}_{tax_year}.txt"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+
+    except ValueError:
+        # Invalid filing_id format
+        messages.error(request, 'Invalid filing ID format')
+        return redirect('user_home')
+    except Exception as e:
+        messages.error(request, f'Error downloading tax details: {str(e)}')
+        return redirect('view_tax_filing', filing_id=filing_id)
+
+# Also update your existing view_tax_filing function to include the download functionality
 def view_tax_filing(request, filing_id):
     try:
         # Existing code for extracting filing details
@@ -463,15 +521,22 @@ def view_tax_filing(request, filing_id):
                 lines = file.read().strip().split("\n----------------------------------------\n")
                 for entry in lines:
                     parts = entry.split("\n")
-                    name = ""
+                    name_val = ""
                     message = ""
+                    timestamp = ""
                     for part in parts:
                         if part.startswith("Name: "):
-                            name = part.replace("Name: ", "").strip()
+                            name_val = part.replace("Name: ", "").strip()
                         elif part.startswith("Message: "):
                             message = part.replace("Message: ", "").strip()
-                    if name and message:
-                        audit_messages.append({"name": name, "message": message})
+                        elif part.startswith("Timestamp: "):
+                            timestamp = part.replace("Timestamp: ", "").strip()
+                    if name_val and message:
+                        audit_messages.append({
+                            "name": name_val, 
+                            "message": message,
+                            "timestamp": timestamp
+                        })
 
         context = {
             'filing_id': filing_id,
@@ -493,139 +558,378 @@ def view_tax_filing(request, filing_id):
         messages.error(request, f'Error loading filing: {str(e)}')
         return redirect('user_home')
 
+def view_tax_details(request, filing_id):
+    """
+    View for displaying and editing tax details
+    """
+    try:
+        # Extract filing details from filing_id
+        user_phone, name, tax_year = filing_id.split('_')
+        session_phone = request.session.get('user_phone')
+        user_type = request.session.get('user_type')
 
-# def view_tax_filing(request, filing_id):
-#     try:
-#         user_phone, name, tax_year = filing_id.split('_')
-#         session_phone = request.session.get('user_phone')
-#         user_type = request.session.get('user_type')
+        # Authorization checks
+        if user_type == 'user' and session_phone != user_phone:
+            messages.error(request, 'Unauthorized access')
+            return redirect('user_home')
         
-#         # Authorization checks
-#         if user_type == 'user' and session_phone != user_phone:
-#             messages.error(request, 'Unauthorized access')
-#             return redirect('user_home')
-#         if user_type == 'ca':
-#             ca_mapping_path = os.path.join(CA_DATA_DIR, session_phone, 'ca_mapping.txt')
-#             if not os.path.exists(ca_mapping_path) or user_phone not in open(ca_mapping_path).read().splitlines():
-#                 messages.error(request, 'Unauthorized access')
-#                 return redirect('user_home')
+        if user_type == 'ca':
+            ca_mapping_path = os.path.join(CA_DATA_DIR, session_phone, 'ca_mapping.txt')
+            if not os.path.exists(ca_mapping_path) or user_phone not in open(ca_mapping_path).read().splitlines():
+                messages.error(request, 'Unauthorized access')
+                return redirect('user_home')
+
+        # Check if user can edit (only 'user' type can edit)
+        can_edit = (user_type == 'user')
+
+        # Read tax details from file
+        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
+        
+        if not os.path.exists(tax_details_path):
+            messages.error(request, 'Tax details file not found')
+            return redirect('view_tax_filing', filing_id=filing_id)
+
+        # Parse tax details
+        tax_details = []
+        tax_details_dict = {}
+        additional_notes = ""
+        
+        with open(tax_details_path, 'r') as file:
+            content = file.read().strip()
+            
+            # Check if there are additional notes section
+            if '\n\nAdditional Notes:\n' in content:
+                main_content, notes_section = content.split('\n\nAdditional Notes:\n', 1)
+                additional_notes = notes_section.strip()
+            else:
+                main_content = content
+            
+            # Parse main tax details
+            for line in main_content.split('\n'):
+                if ': ' in line:
+                    label, value = line.split(': ', 1)
+                    tax_details.append({
+                        'label': label.strip(),
+                        'value': value.strip()
+                    })
+                    tax_details_dict[label.strip()] = value.strip()
+
+        # Extract specific values for summary
+        total_income = tax_details_dict.get('Total Income', '0')
+        total_tax = tax_details_dict.get('Total Tax', '0')
+        user_name = tax_details_dict.get('Name', name)
+
+        context = {
+            'filing_id': filing_id,
+            'tax_details': tax_details,
+            'user_name': user_name,
+            'tax_year': tax_year,
+            'total_income': total_income,
+            'total_tax': total_tax,
+            'additional_notes': additional_notes,
+            'user_type': user_type,
+            'can_edit': can_edit
+        }
+
+        return render(request, 'tax_details.html', context)
+
+    except Exception as e:
+        messages.error(request, f'Error loading tax details: {str(e)}')
+        return redirect('view_tax_filing', filing_id=filing_id)
+
+
+@require_http_methods(["POST"])
+def update_tax_details(request, filing_id):
+    """
+    AJAX endpoint for updating tax details
+    """
+    try:
+        # Extract filing details from filing_id
+        user_phone, name, tax_year = filing_id.split('_')
+        session_phone = request.session.get('user_phone')
+        user_type = request.session.get('user_type')
+
+        # Authorization checks - only users can edit
+        if user_type == 'user' and session_phone != user_phone:
+            return JsonResponse({'success': False, 'error': 'Unauthorized access'})
+        
+        if user_type == 'ca':
+            return JsonResponse({'success': False, 'error': 'CAs cannot edit tax details. Only users can edit their own details.'})
+        
+        # Double-check that this is a user trying to edit their own details
+        if user_type != 'user' or session_phone != user_phone:
+            return JsonResponse({'success': False, 'error': 'Unauthorized access'})
+
+        # Get form data
+        form_data = request.POST
+
+        # Build updated tax details content
+        tax_details_lines = []
+        
+        # Read current file to maintain order and get existing fields
+        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
+        existing_fields = []
+        
+        if os.path.exists(tax_details_path):
+            with open(tax_details_path, 'r') as file:
+                content = file.read().strip()
                 
-#         # File paths
-#         tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
-#         documents_folder = os.path.join(DATA_DIR, user_phone, name, tax_year, 'documents')
-#         audit_trail_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'audit_trail.txt')
+                # Extract main content (before additional notes)
+                if '\n\nAdditional Notes:\n' in content:
+                    main_content = content.split('\n\nAdditional Notes:\n', 1)[0]
+                else:
+                    main_content = content
+                
+                # Get existing field order
+                for line in main_content.split('\n'):
+                    if ': ' in line:
+                        field_name = line.split(': ', 1)[0].strip()
+                        existing_fields.append(field_name)
+
+        # Build new content maintaining field order
+        for field_name in existing_fields:
+            if field_name in form_data:
+                value = form_data[field_name].strip()
+                tax_details_lines.append(f"{field_name}: {value}")
+            else:
+                # Keep original value if not in form (for read-only fields)
+                with open(tax_details_path, 'r') as file:
+                    for line in file:
+                        if line.startswith(f"{field_name}: "):
+                            tax_details_lines.append(line.strip())
+                            break
+
+        # Add any new fields from form that weren't in original file
+        for field_name, value in form_data.items():
+            if field_name not in existing_fields and field_name != 'csrfmiddlewaretoken' and field_name != 'Additional Notes':
+                tax_details_lines.append(f"{field_name}: {value.strip()}")
+
+        # Build final content
+        final_content = '\n'.join(tax_details_lines)
         
-#         # Read tax details
-#         tax_details_lines = []
-#         with open(tax_details_path, 'r') as file:
-#             for line in file.read().split('\n'):
-#                 if ': ' in line:
-#                     parts = line.split(': ', 1)
-#                     tax_details_lines.append({'label': parts[0], 'value': parts[1]})
+        # Add additional notes if provided
+        additional_notes = form_data.get('Additional Notes', '').strip()
+        if additional_notes:
+            final_content += f"\n\nAdditional Notes:\n{additional_notes}"
+
+        # Update the Last Updated field with current timestamp
+        from datetime import datetime
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-#         # Create dictionary for easy access
-#         tax_details_dict = {item["label"]: item["value"] for item in tax_details_lines}
+        # Replace or add Last Updated field
+        lines = final_content.split('\n')
+        updated_lines = []
+        last_updated_found = False
         
-#         # Group tax details into categories for better organization
-#         personal_info = []
-#         financial_info = []
-#         nri_info = []
-#         other_info = []
+        for line in lines:
+            if line.startswith('Last Updated: '):
+                updated_lines.append(f"Last Updated: {current_time}")
+                last_updated_found = True
+            else:
+                updated_lines.append(line)
         
-#         for item in tax_details_lines:
-#             label = item['label']
-#             # Personal information
-#             if label in ["Name", "PAN Number", "Aadhaar Number", "Aadhaar Mobile", "Email", "IT Password"]:
-#                 personal_info.append(item)
-#             # NRI related
-#             elif label in ["Is NRI", "Days in India (2024-25)", "Days in India (2020-24)", "NRI Bank Details"]:
-#                 nri_info.append(item)
-#             # Financial details
-#             elif label in ["Income Type", "Rent Details", "Property Details", "FD Income", 
-#                          "Mutual Fund Details", "Other Income", "Refund Bank Details"]:
-#                 financial_info.append(item)
-#             # Other information
-#             else:
-#                 other_info.append(item)
+        if not last_updated_found:
+            # Add Last Updated before additional notes if it exists
+            if '\n\nAdditional Notes:\n' in final_content:
+                main_part = '\n'.join([l for l in updated_lines if not l.startswith('Additional Notes:')])
+                notes_part = additional_notes
+                final_content = f"{main_part}\nLast Updated: {current_time}\n\nAdditional Notes:\n{notes_part}"
+            else:
+                final_content = '\n'.join(updated_lines) + f"\nLast Updated: {current_time}"
+        else:
+            final_content = '\n'.join(updated_lines)
+
+        # Write updated content to file
+        with open(tax_details_path, 'w') as file:
+            file.write(final_content)
+
+        return JsonResponse({'success': True, 'message': 'Tax details updated successfully'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def update_tax_filing_status(user_phone, name, tax_year, new_status):
+    """
+    Helper function to update tax filing status in the tax_details.txt file
+    """
+    try:
+        tax_details_path = os.path.join(DATA_DIR, user_phone, name, tax_year, 'tax_details.txt')
         
-#         # Get basic details
-#         pan_number = tax_details_dict.get("PAN Number")
-#         user_name = tax_details_dict.get("Name")
-#         submission_date = tax_details_dict.get("Submission Date")
-#         status = tax_details_dict.get("Status")
+        if not os.path.exists(tax_details_path):
+            return False
         
-#         # Read documents
-#         documents = []
-#         if os.path.exists(documents_folder):
-#             for filename in os.listdir(documents_folder):
-#                 if os.path.isfile(os.path.join(documents_folder, filename)):
-#                     file_path = os.path.join(documents_folder, filename)
-#                     file_size = os.path.getsize(file_path)
-#                     # Format file size
-#                     if file_size < 1024:
-#                         size_str = f"{file_size} B"
-#                     elif file_size < 1024 * 1024:
-#                         size_str = f"{file_size/1024:.1f} KB"
-#                     else:
-#                         size_str = f"{file_size/(1024*1024):.1f} MB"
-                    
-#                     # Get file modification time
-#                     mod_time = os.path.getmtime(file_path)
-#                     upload_date = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M')
-                    
-#                     documents.append({
-#                         'name': filename,
-#                         'type': get_document_type_display(filename),
-#                         'file_type': get_file_type(filename),
-#                         'size': size_str,
-#                         'upload_date': upload_date
-#                     })
+        # Read current content
+        with open(tax_details_path, 'r') as file:
+            content = file.read()
         
-#         # Read and format audit trail messages
-#         audit_messages = []
-#         if os.path.exists(audit_trail_path):
-#             with open(audit_trail_path, 'r') as file:
-#                 lines = file.read().strip().split("\n----------------------------------------\n")
-#                 for entry in lines:
-#                     parts = entry.split("\n")
-#                     name = ""
-#                     message = ""
-#                     timestamp = ""
-#                     for part in parts:
-#                         if part.startswith("Name: "):
-#                             name = part.replace("Name: ", "").strip()
-#                         elif part.startswith("Message: "):
-#                             message = part.replace("Message: ", "").strip()
-#                         elif part.startswith("Timestamp: "):
-#                             timestamp = part.replace("Timestamp: ", "").strip()
-#                     if name and message:
-#                         audit_messages.append({
-#                             "name": name, 
-#                             "message": message,
-#                             "timestamp": timestamp if timestamp else "Unknown"
-#                         })
+        # Update status and last updated time
+        from datetime import datetime
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-#         context = {
-#             'filing_id': filing_id,
-#             "pan_number": pan_number,
-#             "user_name": user_name,
-#             "submission_date": submission_date,
-#             "status": status,
-#             'documents': documents,
-#             'tax_year': tax_year,
-#             'name': name,
-#             "user_phone": user_phone,
-#             'audit_messages': audit_messages,
-#             'tax_details_lines': tax_details_lines,
-#             'personal_info': personal_info,
-#             'financial_info': financial_info,
-#             'nri_info': nri_info,
-#             'other_info': other_info
-#         }
-#         return render(request, 'view_tax_filing.html', context)
-#     except Exception as e:
-#         messages.error(request, f'Error loading filing: {str(e)}')
-#         return redirect('user_home')
+        lines = content.split('\n')
+        updated_lines = []
+        
+        for line in lines:
+            if line.startswith('Status: '):
+                updated_lines.append(f"Status: {new_status}")
+            elif line.startswith('Last Updated: '):
+                updated_lines.append(f"Last Updated: {current_time}")
+            else:
+                updated_lines.append(line)
+        
+        # Write back to file
+        with open(tax_details_path, 'w') as file:
+            file.write('\n'.join(updated_lines))
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error updating tax filing status: {e}")
+        return False
+
+
+def user_profile(request):
+    """
+    View for displaying user profile information
+    """
+    try:
+        # Get user session data
+        user_phone = request.session.get('user_phone')
+        user_type = request.session.get('user_type')
+        
+        if not user_phone:
+            messages.error(request, 'Session expired. Please login again.')
+            return redirect('login')
+        
+        # Read user information from file
+        user_info_path = os.path.join(DATA_DIR, user_phone, 'user_information.txt')
+        
+        if not os.path.exists(user_info_path):
+            messages.error(request, 'User information not found')
+            return redirect('user_home')
+        
+        # Parse user information
+        user_details = {}
+        with open(user_info_path, 'r') as file:
+            for line in file:
+                if ': ' in line:
+                    key, value = line.strip().split(': ', 1)
+                    user_details[key] = value
+        
+        # Get filing statistics (optional - you can calculate these based on your filing structure)
+        user_folder = os.path.join(DATA_DIR, user_phone)
+        total_filings = 0
+        completed_filings = 0
+        pending_filings = 0
+        
+        # Count filings by iterating through user's folders
+        if os.path.exists(user_folder):
+            for item in os.listdir(user_folder):
+                item_path = os.path.join(user_folder, item)
+                if os.path.isdir(item_path) and item != 'user_information.txt':
+                    # Count tax year folders for each name folder
+                    for subitem in os.listdir(item_path):
+                        subitem_path = os.path.join(item_path, subitem)
+                        if os.path.isdir(subitem_path):
+                            total_filings += 1
+                            # Check if filing is completed (you can adjust this logic based on your file structure)
+                            status_file = os.path.join(subitem_path, 'status.txt')
+                            if os.path.exists(status_file):
+                                with open(status_file, 'r') as f:
+                                    status = f.read().strip()
+                                    if status.lower() == 'completed':
+                                        completed_filings += 1
+                                    else:
+                                        pending_filings += 1
+                            else:
+                                pending_filings += 1
+        
+        # Prepare context data
+        context = {
+            'user_name': user_details.get('Full Name', ''),
+            'user_phone': user_details.get('Phone Number', user_phone),
+            'user_email': user_details.get('Email', ''),
+            'user_password': '••••••••',  # Never show actual password
+            'registration_date': user_details.get('Registration Date', ''),
+            'user_type': user_type,
+            'total_filings': total_filings,
+            'completed_filings': completed_filings,
+            'pending_filings': pending_filings,
+            # Additional fields if they exist in your user_information.txt
+            'user_pan': user_details.get('PAN Number', ''),
+            'user_dob': user_details.get('Date of Birth', ''),
+            'user_gender': user_details.get('Gender', ''),
+            'user_address': user_details.get('Address', ''),
+            'user_city': user_details.get('City', ''),
+            'user_state': user_details.get('State', ''),
+            'user_pincode': user_details.get('PIN Code', ''),
+            'user_country': user_details.get('Country', 'India'),
+        }
+        
+        return render(request, 'user_profile.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Error loading profile: {str(e)}')
+        return redirect('user_home')
+
+
+def update_user_profile(request):
+    """
+    View for updating user profile information
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    
+    try:
+        user_phone = request.session.get('user_phone')
+        
+        if not user_phone:
+            return JsonResponse({'success': False, 'error': 'Session expired'})
+        
+        # Read current user information
+        user_info_path = os.path.join(DATA_DIR, user_phone, 'user_information.txt')
+        
+        if not os.path.exists(user_info_path):
+            return JsonResponse({'success': False, 'error': 'User information not found'})
+        
+        # Parse current user information
+        user_details = {}
+        with open(user_info_path, 'r') as file:
+            for line in file:
+                if ': ' in line:
+                    key, value = line.strip().split(': ', 1)
+                    user_details[key] = value
+        
+        # Update with new values from form (excluding phone number and password)
+        updatable_fields = {
+            'Full Name': request.POST.get('name', '').strip(),
+            'Email': request.POST.get('email', '').strip(),
+            'PAN Number': request.POST.get('pan', '').strip(),
+            'Date of Birth': request.POST.get('dob', '').strip(),
+            'Gender': request.POST.get('gender', '').strip(),
+            'Address': request.POST.get('address', '').strip(),
+            'City': request.POST.get('city', '').strip(),
+            'State': request.POST.get('state', '').strip(),
+            'PIN Code': request.POST.get('pincode', '').strip(),
+            'Country': request.POST.get('country', '').strip(),
+        }
+        
+        # Update only non-empty fields
+        for key, value in updatable_fields.items():
+            if value:  # Only update if value is provided
+                user_details[key] = value
+        
+        # Write updated information back to file
+        with open(user_info_path, 'w') as file:
+            for key, value in user_details.items():
+                file.write(f"{key}: {value}\n")
+        
+        return JsonResponse({'success': True, 'message': 'Profile updated successfully'})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
     
 def download_all_documents(request, filing_id):
     try:

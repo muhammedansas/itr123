@@ -219,6 +219,42 @@
                     {% endfor %}
                   </div>
                 </div>
+
+                <!-- Tax Information Download Section -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                  <h3 class="text-sm font-medium text-gray-600 mb-3">
+                    Tax Information
+                  </h3>
+                  <a
+                    href="{% url 'download_tax_details' filing_id=filing_id %}"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 transform hover:scale-105 shadow-md"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Download Tax Details
+                  </a>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                
+                  <div class="space-y-2">
+                    
+                    
+                    {% if request.session.user_type == 'user' %}
+                    <a
+                      href="{% url 'download_all_docs' filing_id=filing_id %}"
+                      class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                      Download All Documents
+                    </a>
+                    {% endif %}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -389,6 +425,22 @@
                       Send
                     </button>
                   </div>
+                </div>
+
+                <!-- View & Edit Tax Details Button (Added after audit trail) -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                  <h3 class="text-sm font-medium text-gray-600 mb-3">
+                    Tax Details Management
+                  </h3>
+                  <a
+                    href="{% url 'view_tax_details' filing_id=filing_id %}"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-md"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    View & Edit Tax Details
+                  </a>
                 </div>
               </div>
             </div>

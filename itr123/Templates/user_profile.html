@@ -1,0 +1,552 @@
+{% extends 'base.html' %} 
+{% block content %}
+<div class="flex h-screen bg-gradient-to-r from-gray-50 to-blue-50">
+  <!-- Sidebar with animation -->
+  <aside class="w-64 bg-white border-r border-gray-200 shadow-lg transform transition-all duration-300 ease-in-out hover:shadow-xl">
+    <div class="p-6 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500 hover:from-purple-600 hover:to-blue-600">
+        TaxDocuVerse
+      </h1>
+      {% if request.session.user_type == 'ca' %}
+      <p class="text-sm text-gray-600 mt-1">CA Portal</p>
+      {% else %}
+      <p class="text-sm text-gray-600 mt-1">User Portal</p>
+      {% endif %}
+    </div>
+
+    <div class="p-6">
+      <p class="text-sm font-medium text-gray-500 mb-4">Main Menu</p>
+      <nav class="space-y-2">
+        <a
+          href="{% url 'user_home' %}"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        {% if request.session.user_type == 'ca' %}
+        <a
+          href="{% url 'myfilings' %}"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Client Filings
+        </a>
+        {% else %}
+        <a
+          href="{% url 'myfilings' %}"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:shadow-md hover:translate-x-2 transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-gray-500 transition-colors duration-200 group-hover:text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          My Filings
+        </a>
+        {% endif %}
+        <a
+          href="{% url 'user_profile' %}"
+          class="flex items-center px-4 py-3 text-sm rounded-lg text-blue-700 bg-gradient-to-r from-blue-50 to-purple-50 shadow-md translate-x-2 transition-all duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-3 text-blue-500 transition-colors duration-200"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Profile
+        </a>
+      </nav>
+    </div>
+
+    <div class="absolute bottom-0 w-64 p-4 text-xs text-gray-500 border-t border-gray-200 bg-white">
+      <p>© 2025 TaxDocuVerse</p>
+      <p>Professional tax services</p>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Content area -->
+    <main class="flex-1 overflow-auto p-8">
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div class="transition-all duration-300 transform hover:translate-x-1">
+            <h1 class="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              My Profile
+            </h1>
+            <p class="text-sm text-gray-600 mt-1">
+              Manage your account information and preferences
+            </p>
+          </div>
+          
+          <!-- Edit Profile Button -->
+          <div class="flex gap-3">
+            <button
+              id="edit-profile-btn"
+              class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              Edit Profile
+            </button>
+            <button
+              id="save-profile-btn"
+              class="hidden px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Save Changes
+            </button>
+            <button
+              id="cancel-profile-btn"
+              class="hidden px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
+          <!-- Profile Overview Card -->
+          <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-xl border-2 border-transparent hover:border-blue-200 transition-all duration-300 hover:shadow-2xl overflow-hidden">
+              <!-- Profile Header -->
+              <div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50 text-center">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4 transition-all duration-300 hover:scale-110">
+                  {{ user_name|first|upper }}{{ user_name|slice:"1:"|first|upper }}
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">{{ user_name }}</h2>
+                <p class="text-sm text-gray-600 mt-1">
+                  {% if user_type == 'ca' %}
+                    Chartered Accountant
+                  {% else %}
+                    Taxpayer
+                  {% endif %}
+                </p>
+                <div class="mt-4 flex justify-center">
+                  <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-300">
+                    Active Account
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quick Stats -->
+              <div class="p-6">
+                <h3 class="text-sm font-medium text-gray-500 mb-4">Account Summary</h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                    <span class="text-sm font-medium text-gray-600">Total Filings</span>
+                    <span class="text-lg font-bold text-blue-600">{{ total_filings }}</span>
+                  </div>
+                  <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors duration-200">
+                    <span class="text-sm font-medium text-gray-600">Completed</span>
+                    <span class="text-lg font-bold text-green-600">{{ completed_filings }}</span>
+                  </div>
+                  <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors duration-200">
+                    <span class="text-sm font-medium text-gray-600">Pending</span>
+                    <span class="text-lg font-bold text-orange-600">{{ pending_filings }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Details Form -->
+          <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-xl border-2 border-transparent hover:border-blue-200 transition-all duration-300 hover:shadow-2xl">
+              <div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                  </svg>
+                  Personal Information
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">View and manage your profile details</p>
+              </div>
+
+              <form id="profile-form" class="p-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Personal Details -->
+                  <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                      Basic Information
+                    </h3>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input 
+                      type="text" 
+                      name="name" 
+                      value="{{ user_name }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      name="phone" 
+                      value="{{ user_phone }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      readonly
+                    />
+                    <p class="text-xs text-gray-500">Phone number cannot be changed</p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      value="{{ user_email }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">PAN Number</label>
+                    <input 
+                      type="text" 
+                      name="pan" 
+                      value="{{ user_pan }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                    <input 
+                      type="date" 
+                      name="dob" 
+                      value="{{ user_dob }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Gender</label>
+                    <select 
+                      name="gender" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male" {% if user_gender == 'Male' %}selected{% endif %}>Male</option>
+                      <option value="Female" {% if user_gender == 'Female' %}selected{% endif %}>Female</option>
+                      <option value="Other" {% if user_gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                  </div>
+
+                  <!-- Address Information -->
+                  <div class="md:col-span-2 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                      Address Information
+                    </h3>
+                  </div>
+
+                  <div class="md:col-span-2 space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Street Address</label>
+                    <input 
+                      type="text" 
+                      name="address" 
+                      value="{{ user_address }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">City</label>
+                    <input 
+                      type="text" 
+                      name="city" 
+                      value="{{ user_city }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">State</label>
+                    <input 
+                      type="text" 
+                      name="state" 
+                      value="{{ user_state }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">PIN Code</label>
+                    <input 
+                      type="text" 
+                      name="pincode" 
+                      value="{{ user_pincode }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Country</label>
+                    <input 
+                      type="text" 
+                      name="country" 
+                      value="{{ user_country|default:'India' }}" 
+                      class="profile-field w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 bg-gray-50" 
+                      disabled
+                    />
+                  </div>
+
+                  <!-- Account Information -->
+                  <div class="md:col-span-2 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                      Account Information
+                    </h3>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Account Type</label>
+                    <input 
+                      type="text" 
+                      value="{% if user_type == 'ca' %}Chartered Accountant{% else %}Individual Taxpayer{% endif %}" 
+                      class="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700" 
+                      readonly
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Member Since</label>
+                    <input 
+                      type="text" 
+                      value="{{ registration_date }}" 
+                      class="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700" 
+                      readonly
+                    />
+                  </div>
+                </div>
+              </form>
+
+              <!-- Success/Error Messages -->
+              <div id="profile-message-area" class="hidden p-4 mx-6 mb-6 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Custom Animations -->
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.8s ease-out; }
+  .animate-slide-up { animation: slide-up 0.8s ease-out; }
+  
+  .profile-field:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+  
+  .profile-field:not(:disabled) {
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editBtn = document.getElementById('edit-profile-btn');
+    const saveBtn = document.getElementById('save-profile-btn');
+    const cancelBtn = document.getElementById('cancel-profile-btn');
+    const profileFields = document.querySelectorAll('.profile-field');
+    const messageArea = document.getElementById('profile-message-area');
+    const form = document.getElementById('profile-form');
+    
+    let originalValues = {};
+    
+    // Store original values
+    profileFields.forEach(field => {
+        originalValues[field.name] = field.value;
+    });
+    
+    // Edit button click
+    editBtn.addEventListener('click', function() {
+        enableEditing();
+    });
+    
+    // Cancel button click
+    cancelBtn.addEventListener('click', function() {
+        disableEditing();
+        restoreOriginalValues();
+    });
+    
+    // Save button click
+    saveBtn.addEventListener('click', function() {
+        saveProfile();
+    });
+    
+    function enableEditing() {
+        profileFields.forEach(field => {
+            // Don't enable phone field (it's readonly)
+            if (field.name !== 'phone') {
+                field.disabled = false;
+                field.classList.remove('bg-gray-50');
+                field.classList.add('bg-white');
+            }
+        });
+        
+        editBtn.classList.add('hidden');
+        saveBtn.classList.remove('hidden');
+        cancelBtn.classList.remove('hidden');
+        hideMessage();
+    }
+    
+    function disableEditing() {
+        profileFields.forEach(field => {
+            field.disabled = true;
+            field.classList.remove('bg-white');
+            field.classList.add('bg-gray-50');
+        });
+        
+        editBtn.classList.remove('hidden');
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+    }
+    
+    function restoreOriginalValues() {
+        profileFields.forEach(field => {
+            field.value = originalValues[field.name] || '';
+        });
+    }
+    
+    function saveProfile() {
+        const formData = new FormData(form);
+        
+        // Show loading state
+        saveBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Saving...
+        `;
+        saveBtn.disabled = true;
+        
+        fetch("{% url 'update_user_profile' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Profile updated successfully!', 'success');
+                disableEditing();
+                // Update original values
+                profileFields.forEach(field => {
+                    originalValues[field.name] = field.value;
+                });
+                
+                // Update the profile initials if name changed
+                const nameField = document.querySelector('input[name="name"]');
+                if (nameField && nameField.value.trim()) {
+                    const initials = nameField.value.trim().split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    const avatarElement = document.querySelector('.bg-gradient-to-r.from-blue-500.to-purple-500');
+                    if (avatarElement) {
+                        avatarElement.textContent = initials;
+                    }
+                }
+            } else {
+                showMessage('Error updating profile: ' + (data.error || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Network error occurred. Please try again.', 'error');
+        })
+        .finally(() => {
+            // Reset save button
+            saveBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Save Changes
+            `;
+            saveBtn.disabled = false;
+        });
+    }
+    
+    function showMessage(text, type) {
+        messageArea.className = `p-4 mx-6 mb-6 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'}`;
+        messageArea.textContent = text;
+        messageArea.classList.remove('hidden');
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            hideMessage();
+        }, 5000);
+    }
+    
+    function hideMessage() {
+        messageArea.classList.add('hidden');
+    }
+});
+</script>
+
+{% endblock %}
